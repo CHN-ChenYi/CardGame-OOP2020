@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# qt
+*.pro.user
+
+# vs
+.vs/
