@@ -33,6 +33,7 @@
 
 # qt
 *.pro.user
+build*/
 
 # vs
 .vs/

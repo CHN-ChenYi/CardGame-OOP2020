@@ -10,6 +10,7 @@ void StartGame() {}
 bool Play(const Card cards[], const unsigned short size) {}
 void PlayAgain() {}
 void Home() {}
+void Exit() {}
 
 void MainWindow::SetInfo(const wchar_t *info) {}
 // id: 0 for the south(the player), 1 for the north, 2 for the east, 3 for the
@@ -38,7 +39,7 @@ void MainWindow::UpdatePlayer(const unsigned short id,
 }  // for Playing Page
 // delta minus 0 means player draws some cards
 void MainWindow::UpdateCards(const unsigned short id,
-                             const unsigned short delta, const Card cards[]) {
+                             const short delta, const Card cards[]) {
 }  // for Playing Page
 void MainWindow::UpdateStatistics(const unsigned short points[4]) {
 }  // for Playing Hearts Page

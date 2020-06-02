@@ -38,6 +38,7 @@ void StartGame();
 bool Play(const Card cards[], const unsigned short size);
 void PlayAgain();
 void Home();
+void Exit();
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -65,7 +66,7 @@ class MainWindow : public QMainWindow {
   void UpdatePlayer(const unsigned short id, const double network_status,
                     const bool controlled_by_bot);  // for Playing Page
   // delta minus 0 means player draws some cards
-  void UpdateCards(const unsigned short id, const unsigned short delta,
+  void UpdateCards(const unsigned short id, const short delta,
                    const Card cards[] = NULL);  // for Playing Page
   void UpdateStatistics(
       const unsigned short points[4]);  // for Playing Hearts Page
