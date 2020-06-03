@@ -1,6 +1,9 @@
 ﻿#pragma once
 
 #include <QMainWindow>
+#include <string>
+
+using std::wstring;
 
 class ContentWidget;
 
@@ -28,10 +31,10 @@ struct Card {
   unsigned rank;
 };
 
-void NewGame(const wchar_t password[], const wchar_t player_name[],
+void NewGame(const wstring &password, const wstring &player_name,
              const GameType type);
-void JoinGame(const wchar_t ip[], const wchar_t password[],
-              const wchar_t player_name[]);
+void JoinGame(const wstring &ip, const wstring &password,
+              const wstring &player_name);
 void AddBot();
 void StartGame();
 // if return false, the cards will go back to players hand
@@ -45,21 +48,21 @@ class MainWindow : public QMainWindow {
 
  public:
   MainWindow();
-  void SetInfo(const wchar_t *info);
+  void SetInfo(const wstring &info);
   // id: 0 for the south(the player), 1 for the north, 2 for the east, 3 for the
   // west status ranges from 0 to 1, 1 represents the best
   void DrawHomePage();
   void DrawInitPage();
   void DrawJoinPage();
-  void DrawWaitingPage(const GameType type, const wchar_t ip[],
-                       wchar_t *const player_name[4],
+  void DrawWaitingPage(const GameType type, const wstring &ip,
+                       const wstring (&player_name)[4],
                        const double network_status[4]);
-  void AddPlayer(const unsigned short id, const wchar_t player_name[],
+  void AddPlayer(const unsigned short id, const wstring &player_name,
                  const double network_status);  // for Waiting Page
   void RemovePlayer(const unsigned short id);   // for Waiting Page
   void SetNetworkStatus(const unsigned short id,
                         const double network_status);  // for Waiting Page
-  void DrawPlayingPage(const GameType type, const wchar_t *const player_name[4],
+  void DrawPlayingPage(const GameType type, const wstring (&player_name)[4],
                        const unsigned short number_of_cards[4],
                        const double network_status[4],
                        const bool controlled_by_bot[4]);  // for Playing Page

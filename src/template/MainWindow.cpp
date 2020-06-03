@@ -49,12 +49,24 @@ void MainWindow::About() {
 
 void MainWindow::Manual() { QMessageBox::about(this, "Manual", "TODO"); }
 
-void MainWindow::NewGame() { qDebug() << "new Game"; }
+void MainWindow::NewGame() {
+  delete content_;
+  content_ = new InitOrJoinWidget(this, 0);
+  setCentralWidget(content_);
+  qDebug() << "new Game";
+}
 
-void MainWindow::JoinGame() { qDebug() << "join Game"; }
+void MainWindow::JoinGame() {
+  delete content_;
+  content_ = new InitOrJoinWidget(this, 1);
+  setCentralWidget(content_);
+  qDebug() << "join Game";
+}
 
 void MainWindow::DrawHomePage() {
   delete content_;
   content_ = new HomeWidget(this);
   setCentralWidget(content_);
 }
+
+void MainWindow::SetInfo(const wstring &info) { content_->SetInfo(info); }
