@@ -30,10 +30,10 @@ void Exit() {}
 void MainWindow::DrawInitPage() {}
 void MainWindow::DrawJoinPage() {}
 void MainWindow::DrawWaitingPage(const GameType type, const wstring &ip) {}
-void MainWindow::AddPlayer(const unsigned short id, const wstring &player_name,
+bool MainWindow::AddPlayer(const unsigned short id, const wstring &player_name,
                            const double network_status) {}  // for Waiting Page
-void MainWindow::RemovePlayer(const unsigned short id) {}   // for Waiting Page
-void MainWindow::SetNetworkStatus(const unsigned short id,
+bool MainWindow::RemovePlayer(const unsigned short id) {}   // for Waiting Page
+bool MainWindow::SetNetworkStatus(const unsigned short id,
                                   const double network_status) {
 }  // for Waiting Page
 void MainWindow::DrawPlayingPage(const GameType type,
@@ -42,12 +42,12 @@ void MainWindow::DrawPlayingPage(const GameType type,
                                  const double network_status[4],
                                  const bool controlled_by_bot[4]) {
 }  // for Playing Page
-void MainWindow::UpdatePlayer(const unsigned short id,
+bool MainWindow::UpdatePlayer(const unsigned short id,
                               const double network_status,
                               const bool controlled_by_bot) {
 }  // for Playing Page
 // delta minus 0 means player draws some cards
-void MainWindow::UpdateCards(const unsigned short id, const short delta,
+bool MainWindow::UpdateCards(const unsigned short id, const short delta,
                              const Card cards[]) {}  // for Playing Page
 void MainWindow::UpdateStatistics(const unsigned short points[4]) {
 }  // for Playing Hearts Page
