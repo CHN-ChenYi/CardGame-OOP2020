@@ -29,9 +29,7 @@ void Exit() {}
 // west status ranges from 0 to 1, 1 represents the best
 void MainWindow::DrawInitPage() {}
 void MainWindow::DrawJoinPage() {}
-void MainWindow::DrawWaitingPage(const GameType type, const wstring &ip,
-                                 const wstring (&player_name)[4],
-                                 const double network_status[4]) {}
+void MainWindow::DrawWaitingPage(const GameType type, const wstring &ip) {}
 void MainWindow::AddPlayer(const unsigned short id, const wstring &player_name,
                            const double network_status) {}  // for Waiting Page
 void MainWindow::RemovePlayer(const unsigned short id) {}   // for Waiting Page
