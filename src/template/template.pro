@@ -11,3 +11,6 @@ SOURCES += \
 HEADERS += \
     ContentWidget.h \
     MainWindow.h
+
+RESOURCES += \
+  Resource.qrc

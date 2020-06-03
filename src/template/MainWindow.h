@@ -74,8 +74,6 @@ class MainWindow : public QMainWindow {
                const unsigned short points[4]);  // for Playing Page
 
  private:
-  void CreateActions();
-  void CreateMenus();
   QMenu *file_menu_;
   QMenu *help_menu_;
   QAction *home_act_;
