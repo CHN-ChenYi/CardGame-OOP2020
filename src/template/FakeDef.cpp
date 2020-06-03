@@ -7,15 +7,25 @@ extern MainWindow *window;
 void NewGame(const wstring &password, const wstring &player_name,
              const GameType type) {
   qDebug() << "New Game" << password << player_name << type;
-  window->SetInfo(L"Success");
+  window->DrawWaitingPage(type, L"127.0.0.1", true);
 }
 void JoinGame(const wstring &ip, const wstring &password,
               const wstring &player_name) {
   qDebug() << "Join Game" << ip << password << player_name;
-  window->SetInfo(L"Success");
+  window->DrawWaitingPage(Winner, ip, false);
 }
-void AddBot() {}
-void StartGame() {}
+void AddBot() {
+  qDebug() << "AddBot";
+  window->SetInfo(L"AddBot");
+  static wchar_t c[2] = L"0";
+  c[0]++;
+  window->AddPlayer(c[0] - '0', c, (c[0] - '0') * 0.25);
+  window->SetNetworkStatus(c[0] - '0' - 1, 0);
+}
+void StartGame() {
+  qDebug() << "StartGame";
+  window->SetInfo(L"StartGame");
+}
 // if return false, the cards will go back to players hand
 bool Play(const Card cards[], const unsigned short size) {}
 void PlayAgain() {}
@@ -29,13 +39,7 @@ void Exit() {}
 // west status ranges from 0 to 1, 1 represents the best
 void MainWindow::DrawInitPage() {}
 void MainWindow::DrawJoinPage() {}
-void MainWindow::DrawWaitingPage(const GameType type, const wstring &ip) {}
-bool MainWindow::AddPlayer(const unsigned short id, const wstring &player_name,
-                           const double network_status) {}  // for Waiting Page
-bool MainWindow::RemovePlayer(const unsigned short id) {}   // for Waiting Page
-bool MainWindow::SetNetworkStatus(const unsigned short id,
-                                  const double network_status) {
-}  // for Waiting Page
+bool MainWindow::RemovePlayer(const unsigned short id) {}  // for Waiting Page
 void MainWindow::DrawPlayingPage(const GameType type,
                                  const wstring (&player_name)[4],
                                  const unsigned short number_of_cards[4],

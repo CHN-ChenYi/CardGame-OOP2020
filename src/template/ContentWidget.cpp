@@ -6,18 +6,35 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QPainter>
 #include <QPushButton>
 #include <QVBoxLayout>
 
 #include "MainWindow.h"
 
+NetworkCircle::NetworkCircle(QWidget *parent, const double network_status)
+    : QWidget(parent), parent_(parent), network_status_(network_status) {}
+
+void NetworkCircle::UpdateNetworkStatus(const double network_status) {
+  network_status_ = network_status;
+  paintEvent(NULL);
+}
+
+void NetworkCircle::paintEvent(QPaintEvent *) {
+  QPainter painter(this);
+  painter.setPen(Qt::NoPen);
+  painter.setBrush(
+      QColor(255 * (1 - network_status_), 255 * network_status_, 0));
+  painter.drawEllipse(0, 0, parent_->height(), parent_->height());
+}
+
 ContentWidget::ContentWidget(QWidget *parent) : QWidget(parent) {}
 
 HomeWidget::HomeWidget(MainWindow *parent) : ContentWidget(parent) {
-  hlayout_ = new QHBoxLayout(this);
-  hlayout_->setContentsMargins(0, 0, 0, 0);
-  hlayout_->setSpacing(0);
-  hlayout_->addStretch();
+  QHBoxLayout *hlayout = new QHBoxLayout(this);
+  hlayout->setContentsMargins(0, 0, 0, 0);
+  hlayout->setSpacing(0);
+  hlayout->addStretch();
 
   bg_image_ = new QPixmap(":/Resource/home.jpg");
   setAutoFillBackground(true);
@@ -26,25 +43,25 @@ HomeWidget::HomeWidget(MainWindow *parent) : ContentWidget(parent) {
   vlayout_ = new QVBoxLayout();
   vlayout_->setContentsMargins(10, 0, 10, 0);
   vlayout_->addStretch();
-  new_game_button_ = new QPushButton("新建游戏", this);
-  new_game_button_->setMinimumSize(150, 45);
-  connect(new_game_button_, &QPushButton::released, parent,
+  QPushButton *new_game_button = new QPushButton("新建游戏", this);
+  new_game_button->setMinimumSize(150, 45);
+  connect(new_game_button, &QPushButton::released, parent,
           &MainWindow::NewGame);
-  vlayout_->addWidget(new_game_button_);
-  vlayout_->addSpacing(new_game_button_->height() / 2);
-  join_game_button_ = new QPushButton("加入游戏", this);
-  join_game_button_->setMinimumSize(150, 45);
-  connect(join_game_button_, &QPushButton::released, parent,
+  vlayout_->addWidget(new_game_button);
+  vlayout_->addSpacing(new_game_button->height() / 2);
+  QPushButton *join_game_button = new QPushButton("加入游戏", this);
+  join_game_button->setMinimumSize(150, 45);
+  connect(join_game_button, &QPushButton::released, parent,
           &MainWindow::JoinGame);
-  vlayout_->addWidget(join_game_button_);
-  vlayout_->addSpacing(join_game_button_->height() / 2);
-  hlayout_->addLayout(vlayout_);
-  this->setLayout(hlayout_);
+  vlayout_->addWidget(join_game_button);
+  vlayout_->addSpacing(join_game_button->height() / 2);
+  hlayout->addLayout(vlayout_);
+  this->setLayout(hlayout);
 }
 
 HomeWidget::~HomeWidget() {
-  delete bg_image_;
   delete vlayout_;
+  delete bg_image_;
 }
 
 void HomeWidget::SetBackgroundImage() {
@@ -59,55 +76,60 @@ void HomeWidget::resizeEvent(QResizeEvent *event) { SetBackgroundImage(); }
 
 InitOrJoinWidget::InitOrJoinWidget(MainWindow *parent, bool widget_type)
     : ContentWidget(parent), widget_type_(widget_type) {
-  layout_ = new QGridLayout(this);
+  QGridLayout *glayout = new QGridLayout(this);
 
-  first_label_ =
+  QLabel *first_label =
       new QLabel(widget_type_ ? "服务器 IP 地址" : "服务器密码", this);
-  layout_->addWidget(first_label_, 0, 0);
+  glayout->addWidget(first_label, 0, 0);
 
-  second_label_ = new QLabel(widget_type_ ? "服务器密码" : "玩家昵称", this);
-  layout_->addWidget(second_label_, 1, 0);
+  QLabel *second_label =
+      new QLabel(widget_type_ ? "服务器密码" : "玩家昵称", this);
+  glayout->addWidget(second_label, 1, 0);
 
-  third_label_ = new QLabel(widget_type_ ? "玩家昵称" : "游戏类型", this);
-  layout_->addWidget(third_label_, 2, 0);
+  QLabel *third_label =
+      new QLabel(widget_type_ ? "玩家昵称" : "游戏类型", this);
+  glayout->addWidget(third_label, 2, 0);
 
   first_input_ = new QLineEdit(this);
-  first_input_->setPlaceholderText(first_label_->text());
-  layout_->addWidget(first_input_, 0, 1);
+  first_input_->setPlaceholderText(first_label->text());
+  glayout->addWidget(first_input_, 0, 1);
 
   second_input_ = new QLineEdit(this);
-  second_input_->setPlaceholderText(second_label_->text());
-  layout_->addWidget(second_input_, 1, 1);
+  second_input_->setPlaceholderText(second_label->text());
+  glayout->addWidget(second_input_, 1, 1);
 
   if (widget_type_) {
     third_input_ = new QLineEdit(this);
-    third_input_->setPlaceholderText(third_label_->text());
-    layout_->addWidget(third_input_, 2, 1);
+    third_input_->setPlaceholderText(third_label->text());
+    glayout->addWidget(third_input_, 2, 1);
   } else {
     combo_box_ = new QComboBox(this);
     combo_box_->addItem("争上游");
     combo_box_->addItem("红心大战");
-    layout_->addWidget(combo_box_, 2, 1);
+    glayout->addWidget(combo_box_, 2, 1);
   }
 
-  hlayout_ = new QHBoxLayout(this);
+  hlayout_ = new QHBoxLayout();
   hlayout_->addStretch();
 
   info_label_ = new QLabel(this);
   hlayout_->addWidget(info_label_);
 
-  button_ = new QPushButton(widget_type_ ? "加入" : "新建", this);
-  connect(button_, &QPushButton::released, this, &InitOrJoinWidget::Accept);
-  hlayout_->addWidget(button_);
+  QPushButton *button = new QPushButton(widget_type_ ? "加入" : "新建", this);
+  connect(button, &QPushButton::released, this, &InitOrJoinWidget::Accept);
+  hlayout_->addWidget(button);
 
-  layout_->addLayout(hlayout_, 3, 1);
-  setLayout(layout_);
+  glayout->addLayout(hlayout_, 3, 1);
+  setLayout(glayout);
 }
+
+InitOrJoinWidget::~InitOrJoinWidget() { delete hlayout_; }
 
 void InitOrJoinWidget::SetInfo(const wstring &info) {
   info_label_->setText(QString::fromStdWString(info));
-  QFontMetrics fm = QFontMetrics(this->font());
-  info_label_->setMinimumWidth(fm.boundingRect(info_label_->text()).width());
+  QRect rect = QFontMetrics(this->font()).boundingRect(info_label_->text());
+  info_label_->setMinimumWidth(rect.width());
+  info_label_->setMinimumHeight(rect.height());
 }
 
 void InitOrJoinWidget::Accept() {
@@ -121,3 +143,97 @@ void InitOrJoinWidget::Accept() {
               combo_box_->currentIndex() ? Hearts : Winner);
   }
 }
+
+WaitWidget::WaitWidget(MainWindow *parent, const GameType type,
+                       const wstring &ip, bool is_owner)
+    : ContentWidget(parent) {
+  QVBoxLayout *vlayout_ = new QVBoxLayout(this);
+
+  QLabel *ip_label =
+      new QLabel("服务器 IP: " + QString::fromStdWString(ip), this);
+  vlayout_->addWidget(ip_label);
+
+  QLabel *type_label = new QLabel(type == Hearts ? "红心大战" : "争上游", this);
+  vlayout_->addWidget(type_label);
+
+  id_top_ = 0;
+  glayout_ = new QGridLayout();
+  vlayout_->addLayout(glayout_);
+
+  QLabel *wait_label = new QLabel("等待中...", this);
+  vlayout_->addWidget(wait_label);
+
+  vlayout_->addStretch();
+
+  info_label_ = new QLabel(this);
+  vlayout_->addWidget(info_label_);
+
+  hlayout_ = new QHBoxLayout();
+  if (is_owner) {
+    QPushButton *add_bot_button = new QPushButton("加入 Bot", this);
+    connect(add_bot_button, &QPushButton::released, this, &WaitWidget::AddBot);
+    hlayout_->addWidget(add_bot_button);
+    QPushButton *start_game_button = new QPushButton("开始游戏", this);
+    connect(start_game_button, &QPushButton::released, this,
+            &WaitWidget::StartGame);
+    hlayout_->addWidget(start_game_button);
+  }
+  vlayout_->addLayout(hlayout_);
+
+  setLayout(vlayout_);
+}
+
+WaitWidget::~WaitWidget() {
+  delete hlayout_;
+  delete glayout_;
+}
+
+void WaitWidget::SetInfo(const wstring &info) {
+  info_label_->setText(QString::fromStdWString(info));
+  QRect rect = QFontMetrics(this->font()).boundingRect(info_label_->text());
+  info_label_->setMinimumWidth(rect.width());
+  info_label_->setMinimumHeight(rect.height());
+}
+
+bool WaitWidget::AddPlayer(const unsigned short id, const wstring &player_name,
+                           const double network_status) {
+  for (int i = 0; i < id_top_; i++) {
+    if (id_[i] == id) return false;
+  }
+
+  id_[id_top_] = id;
+
+  QLabel *name_label = new QLabel(QString::fromStdWString(player_name), this);
+  glayout_->addWidget(name_label, id_top_, 0);
+
+  QHBoxLayout *hlayout = new QHBoxLayout();
+  QLabel *network_label = new QLabel("网络情况：", name_label);
+  hlayout->addWidget(network_label);
+  NetworkCircle *network_circle =
+      new NetworkCircle(network_label, network_status);
+  char name[20];
+  sprintf(name, "network_circle%d", id);
+  network_circle->setObjectName(name);
+  hlayout->addWidget(network_circle);
+  glayout_->addLayout(hlayout, id_top_, 1);
+
+  id_top_++;
+  return true;
+}
+
+bool WaitWidget::RemovePlayer(const unsigned short id) {}
+
+bool WaitWidget::SetNetworkStatus(const unsigned short id,
+                                  const double network_status) {
+  char name[20];
+  sprintf(name, "network_circle%d", id);
+  NetworkCircle *cur_circle =
+      findChild<NetworkCircle *>(name, Qt::FindChildrenRecursively);
+  if (!cur_circle) return false;
+  cur_circle->UpdateNetworkStatus(network_status);
+  return true;
+}
+
+void WaitWidget::AddBot() { ::AddBot(); }
+
+void WaitWidget::StartGame() { ::StartGame(); }

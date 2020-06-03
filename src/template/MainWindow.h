@@ -8,8 +8,6 @@ using std::wstring;
 class ContentWidget;
 
 QT_BEGIN_NAMESPACE
-class QAction;
-class QMenu;
 class QPushButton;
 QT_END_NAMESPACE
 
@@ -52,7 +50,7 @@ class MainWindow : public QMainWindow {
   void DrawHomePage();
   void DrawInitPage();
   void DrawJoinPage();
-  void DrawWaitingPage(const GameType type, const wstring &ip);
+  void DrawWaitingPage(const GameType type, const wstring &ip, bool is_owner);
   // network_status ranges from 0 to 1, 1 represents the best
   // true => success, false => fail
   bool AddPlayer(const unsigned short id, const wstring &player_name,
@@ -78,13 +76,6 @@ class MainWindow : public QMainWindow {
                const unsigned short points[4]);  // for Playing Page
 
  private:
-  QMenu *file_menu_;
-  QMenu *help_menu_;
-  QAction *home_act_;
-  QAction *exit_act_;
-  QAction *manual_act_;
-  QAction *about_act_;
-  QAction *about_qt_act_;
   ContentWidget *content_;
 
  private slots:
