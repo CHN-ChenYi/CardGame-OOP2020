@@ -38,7 +38,7 @@ MainWindow::MainWindow() {
   // statusBar()->showMessage(message);
 
   setWindowTitle("Title");
-  setMinimumSize(160, 160);
+  setMinimumSize(480, 320);
   resize(480, 320);
 }
 

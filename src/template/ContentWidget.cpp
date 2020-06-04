@@ -127,7 +127,7 @@ InitOrJoinWidget::~InitOrJoinWidget() { delete hlayout_; }
 
 void InitOrJoinWidget::SetInfo(const wstring &info) {
   info_label_->setText(QString::fromStdWString(info));
-  QRect rect = QFontMetrics(this->font()).boundingRect(info_label_->text());
+  QRect rect = QFontMetrics(font()).boundingRect(info_label_->text());
   info_label_->setMinimumWidth(rect.width());
   info_label_->setMinimumHeight(rect.height());
 }
@@ -158,6 +158,9 @@ WaitWidget::WaitWidget(MainWindow *parent, const GameType type,
 
   id_top_ = 0;
   glayout_ = new QGridLayout();
+  glayout_->setColumnStretch(0, 2);
+  glayout_->setColumnStretch(1, 1);
+  glayout_->setColumnStretch(2, 2);
   vlayout_->addLayout(glayout_);
 
   QLabel *wait_label = new QLabel("等待中...", this);
@@ -190,7 +193,7 @@ WaitWidget::~WaitWidget() {
 
 void WaitWidget::SetInfo(const wstring &info) {
   info_label_->setText(QString::fromStdWString(info));
-  QRect rect = QFontMetrics(this->font()).boundingRect(info_label_->text());
+  QRect rect = QFontMetrics(font()).boundingRect(info_label_->text());
   info_label_->setMinimumWidth(rect.width());
   info_label_->setMinimumHeight(rect.height());
 }
@@ -206,16 +209,20 @@ bool WaitWidget::AddPlayer(const unsigned short id, const wstring &player_name,
   QLabel *name_label = new QLabel(QString::fromStdWString(player_name), this);
   name_label->setAttribute(Qt::WA_DeleteOnClose);
   glayout_->addWidget(name_label, id_top_, 0);
+  name_label->setMinimumHeight(
+      QFontMetrics(font()).boundingRect(name_label->text()).height());
 
-  QHBoxLayout *hlayout = new QHBoxLayout();
   QLabel *network_label = new QLabel("网络情况：", name_label);
   network_label->setAttribute(Qt::WA_DeleteOnClose);
-  hlayout->addWidget(network_label);
+  network_label->setAlignment(Qt::AlignRight);
+  glayout_->addWidget(network_label, id_top_, 1);
+  network_label->setMinimumHeight(
+      QFontMetrics(font()).boundingRect(network_label->text()).height() * 1.2);
+
   NetworkCircle *network_circle =
       new NetworkCircle(network_label, network_status);
   network_circle->setAttribute(Qt::WA_DeleteOnClose);
-  hlayout->addWidget(network_circle);
-  glayout_->addLayout(hlayout, id_top_, 1);
+  glayout_->addWidget(network_circle, id_top_, 2);
 
   id_top_++;
   return true;
@@ -224,23 +231,19 @@ bool WaitWidget::AddPlayer(const unsigned short id, const wstring &player_name,
 bool WaitWidget::RemovePlayer(const unsigned short id) {
   for (int i = 0; i < id_top_; i++) {
     if (id_[i] == id) {
-      QLayoutItem *item = glayout_->itemAtPosition(i, 0);
-      glayout_->removeWidget(item->widget());
-      qDebug() << item->widget();
-      item->widget()->close();
-      item = glayout_->itemAtPosition(i, 1);
-      qDebug() << item->layout();
-      glayout_->removeItem(item->layout());
-      item->layout()->itemAt(0)->widget()->close();
-      item->layout()->itemAt(1)->widget()->close();
+      QLayoutItem *item;
+      for (int j = 0; j < 3; j++) {
+        item = glayout_->itemAtPosition(i, j);
+        glayout_->removeWidget(item->widget());
+        item->widget()->close();
+      }
       for (int j = i + 1; j < id_top_; j++) {
         id_[j - 1] = id_[j];
-        item = glayout_->itemAtPosition(j, 0);
-        glayout_->removeWidget(item->widget());
-        glayout_->addWidget(item->widget(), j - 1, 0);
-        item = glayout_->itemAtPosition(j, 1);
-        glayout_->removeItem(item->layout());
-        glayout_->addLayout(item->layout(), j - 1, 1);
+        for (int k = 0; k < 3; k++) {
+          item = glayout_->itemAtPosition(j, k);
+          glayout_->removeWidget(item->widget());
+          glayout_->addWidget(item->widget(), j - 1, k);
+        }
       }
       id_top_--;
       return true;
@@ -253,8 +256,7 @@ bool WaitWidget::SetNetworkStatus(const unsigned short id,
                                   const double network_status) {
   for (int i = 0; i < id_top_; i++) {
     if (id_[i] == id) {
-      dynamic_cast<NetworkCircle *>(
-          glayout_->itemAtPosition(i, 1)->layout()->itemAt(1)->widget())
+      dynamic_cast<NetworkCircle *>(glayout_->itemAtPosition(i, 2)->widget())
           ->UpdateNetworkStatus(network_status);
       return true;
     }
