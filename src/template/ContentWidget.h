@@ -94,7 +94,7 @@ class WaitWidget : public ContentWidget {
   void StartGame();
 
  private:
-  int id_[5], id_top_;
+  int id_[10], id_top_;
   QGridLayout *glayout_;
   QHBoxLayout *hlayout_;
   QLabel *info_label_;

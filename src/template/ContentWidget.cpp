@@ -204,16 +204,16 @@ bool WaitWidget::AddPlayer(const unsigned short id, const wstring &player_name,
   id_[id_top_] = id;
 
   QLabel *name_label = new QLabel(QString::fromStdWString(player_name), this);
+  name_label->setAttribute(Qt::WA_DeleteOnClose);
   glayout_->addWidget(name_label, id_top_, 0);
 
   QHBoxLayout *hlayout = new QHBoxLayout();
   QLabel *network_label = new QLabel("网络情况：", name_label);
+  network_label->setAttribute(Qt::WA_DeleteOnClose);
   hlayout->addWidget(network_label);
   NetworkCircle *network_circle =
       new NetworkCircle(network_label, network_status);
-  char name[20];
-  sprintf(name, "network_circle%d", id);
-  network_circle->setObjectName(name);
+  network_circle->setAttribute(Qt::WA_DeleteOnClose);
   hlayout->addWidget(network_circle);
   glayout_->addLayout(hlayout, id_top_, 1);
 
@@ -221,17 +221,45 @@ bool WaitWidget::AddPlayer(const unsigned short id, const wstring &player_name,
   return true;
 }
 
-bool WaitWidget::RemovePlayer(const unsigned short id) {}
+bool WaitWidget::RemovePlayer(const unsigned short id) {
+  for (int i = 0; i < id_top_; i++) {
+    if (id_[i] == id) {
+      QLayoutItem *item = glayout_->itemAtPosition(i, 0);
+      glayout_->removeWidget(item->widget());
+      qDebug() << item->widget();
+      item->widget()->close();
+      item = glayout_->itemAtPosition(i, 1);
+      qDebug() << item->layout();
+      glayout_->removeItem(item->layout());
+      item->layout()->itemAt(0)->widget()->close();
+      item->layout()->itemAt(1)->widget()->close();
+      for (int j = i + 1; j < id_top_; j++) {
+        id_[j - 1] = id_[j];
+        item = glayout_->itemAtPosition(j, 0);
+        glayout_->removeWidget(item->widget());
+        glayout_->addWidget(item->widget(), j - 1, 0);
+        item = glayout_->itemAtPosition(j, 1);
+        glayout_->removeItem(item->layout());
+        glayout_->addLayout(item->layout(), j - 1, 1);
+      }
+      id_top_--;
+      return true;
+    }
+  }
+  return false;
+}
 
 bool WaitWidget::SetNetworkStatus(const unsigned short id,
                                   const double network_status) {
-  char name[20];
-  sprintf(name, "network_circle%d", id);
-  NetworkCircle *cur_circle =
-      findChild<NetworkCircle *>(name, Qt::FindChildrenRecursively);
-  if (!cur_circle) return false;
-  cur_circle->UpdateNetworkStatus(network_status);
-  return true;
+  for (int i = 0; i < id_top_; i++) {
+    if (id_[i] == id) {
+      dynamic_cast<NetworkCircle *>(
+          glayout_->itemAtPosition(i, 1)->layout()->itemAt(1)->widget())
+          ->UpdateNetworkStatus(network_status);
+      return true;
+    }
+  }
+  return false;
 }
 
 void WaitWidget::AddBot() { ::AddBot(); }

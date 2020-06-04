@@ -86,6 +86,12 @@ bool MainWindow::AddPlayer(const unsigned short id, const wstring &player_name,
   return cur_widget->AddPlayer(id, player_name, network_status);
 }
 
+bool MainWindow::RemovePlayer(const unsigned short id) {
+  WaitWidget *cur_widget = dynamic_cast<WaitWidget *>(content_);
+  if (!cur_widget) return false;
+  return cur_widget->RemovePlayer(id);
+}
+
 bool MainWindow::SetNetworkStatus(const unsigned short id,
                                   const double network_status) {
   WaitWidget *cur_widget = dynamic_cast<WaitWidget *>(content_);

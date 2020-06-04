@@ -14,18 +14,21 @@ void JoinGame(const wstring &ip, const wstring &password,
   qDebug() << "Join Game" << ip << password << player_name;
   window->DrawWaitingPage(Winner, ip, false);
 }
+
+wchar_t c[2] = L"0";
 void AddBot() {
   qDebug() << "AddBot";
   window->SetInfo(L"AddBot");
-  static wchar_t c[2] = L"0";
   c[0]++;
-  window->AddPlayer(c[0] - '0', c, (c[0] - '0') * 0.25);
-  window->SetNetworkStatus(c[0] - '0' - 1, 0);
+  window->AddPlayer(c[0] - '0', c, 1.0 * rand() / RAND_MAX);
+  window->SetNetworkStatus(c[0] - '0' - rand() % 4, 1.0 * rand() / RAND_MAX);
 }
 void StartGame() {
   qDebug() << "StartGame";
   window->SetInfo(L"StartGame");
+  window->RemovePlayer(c[0] - '0' - 2);
 }
+
 // if return false, the cards will go back to players hand
 bool Play(const Card cards[], const unsigned short size) {}
 void PlayAgain() {}
@@ -39,7 +42,6 @@ void Exit() {}
 // west status ranges from 0 to 1, 1 represents the best
 void MainWindow::DrawInitPage() {}
 void MainWindow::DrawJoinPage() {}
-bool MainWindow::RemovePlayer(const unsigned short id) {}  // for Waiting Page
 void MainWindow::DrawPlayingPage(const GameType type,
                                  const wstring (&player_name)[4],
                                  const unsigned short number_of_cards[4],
