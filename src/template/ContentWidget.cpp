@@ -17,7 +17,7 @@ NetworkCircle::NetworkCircle(QWidget *parent, const double network_status)
 
 void NetworkCircle::UpdateNetworkStatus(const double network_status) {
   network_status_ = network_status;
-  paintEvent(NULL);
+  repaint();
 }
 
 void NetworkCircle::paintEvent(QPaintEvent *) {
