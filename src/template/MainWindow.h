@@ -29,10 +29,10 @@ struct Card {
   unsigned rank;
 };
 
+void NetworkEventProcess();
 void NewGame(const wstring &password, const wstring &player_name,
              const GameType type);
-void JoinGame(const wstring &ip, const wstring &password,
-              const wstring &player_name);
+void JoinGame(const wstring &password, const wstring &player_name);
 void AddBot();
 void StartGame();
 // true => success, false => fail and please SetInfo
@@ -46,11 +46,13 @@ class MainWindow : public QMainWindow {
 
  public:
   MainWindow();
+  void StartNetworkEventLoop(int interval);  // in milliseconds
+  void EndNetworkEventLoop();
   void SetInfo(const wstring &info);
   void DrawHomePage();
   void DrawInitPage();
   void DrawJoinPage();
-  void DrawWaitingPage(const GameType type, const wstring &ip, bool is_owner);
+  void DrawWaitingPage(const GameType type, bool is_owner);
   // network_status ranges from 0 to 1, 1 represents the best
   // true => success, false => fail
   bool AddPlayer(const unsigned short id, const wstring &player_name,

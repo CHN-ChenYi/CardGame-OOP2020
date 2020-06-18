@@ -78,31 +78,24 @@ InitOrJoinWidget::InitOrJoinWidget(MainWindow *parent, bool widget_type)
     : ContentWidget(parent), widget_type_(widget_type) {
   QGridLayout *glayout = new QGridLayout(this);
 
-  QLabel *first_label =
-      new QLabel(widget_type_ ? "服务器 IP 地址" : "服务器密码", this);
+  QLabel *first_label = new QLabel("服务器密码", this);
   glayout->addWidget(first_label, 0, 0);
-
-  QLabel *second_label =
-      new QLabel(widget_type_ ? "服务器密码" : "玩家昵称", this);
-  glayout->addWidget(second_label, 1, 0);
-
-  QLabel *third_label =
-      new QLabel(widget_type_ ? "玩家昵称" : "游戏类型", this);
-  glayout->addWidget(third_label, 2, 0);
 
   first_input_ = new QLineEdit(this);
   first_input_->setPlaceholderText(first_label->text());
   glayout->addWidget(first_input_, 0, 1);
 
+  QLabel *second_label = new QLabel("玩家昵称", this);
+  glayout->addWidget(second_label, 1, 0);
+
   second_input_ = new QLineEdit(this);
   second_input_->setPlaceholderText(second_label->text());
   glayout->addWidget(second_input_, 1, 1);
 
-  if (widget_type_) {
-    third_input_ = new QLineEdit(this);
-    third_input_->setPlaceholderText(third_label->text());
-    glayout->addWidget(third_input_, 2, 1);
-  } else {
+  if (!widget_type_) {
+    QLabel *third_label = new QLabel("游戏类型", this);
+    glayout->addWidget(third_label, 2, 0);
+
     combo_box_ = new QComboBox(this);
     combo_box_->addItem("争上游");
     combo_box_->addItem("红心大战");
@@ -115,7 +108,8 @@ InitOrJoinWidget::InitOrJoinWidget(MainWindow *parent, bool widget_type)
   info_label_ = new QLabel(this);
   hlayout_->addWidget(info_label_);
 
-  QPushButton *button = new QPushButton(widget_type_ ? "加入" : "新建", this);
+  QPushButton *button =
+      new QPushButton(widget_type_ ? "加入游戏" : "新建游戏", this);
   connect(button, &QPushButton::released, this, &InitOrJoinWidget::Accept);
   hlayout_->addWidget(button);
 
@@ -135,8 +129,7 @@ void InitOrJoinWidget::SetInfo(const wstring &info) {
 void InitOrJoinWidget::Accept() {
   if (widget_type_) {
     ::JoinGame(first_input_->text().toStdWString(),
-               second_input_->text().toStdWString(),
-               third_input_->text().toStdWString());
+               second_input_->text().toStdWString());
   } else {
     ::NewGame(first_input_->text().toStdWString(),
               second_input_->text().toStdWString(),
@@ -144,14 +137,9 @@ void InitOrJoinWidget::Accept() {
   }
 }
 
-WaitWidget::WaitWidget(MainWindow *parent, const GameType type,
-                       const wstring &ip, bool is_owner)
+WaitWidget::WaitWidget(MainWindow *parent, const GameType type, bool is_owner)
     : ContentWidget(parent) {
   QVBoxLayout *vlayout_ = new QVBoxLayout(this);
-
-  QLabel *ip_label =
-      new QLabel("服务器 IP: " + QString::fromStdWString(ip), this);
-  vlayout_->addWidget(ip_label);
 
   QLabel *type_label = new QLabel(type == Hearts ? "红心大战" : "争上游", this);
   vlayout_->addWidget(type_label);

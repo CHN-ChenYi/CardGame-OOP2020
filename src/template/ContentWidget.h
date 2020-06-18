@@ -72,7 +72,7 @@ class InitOrJoinWidget : public ContentWidget {
   bool widget_type_;  // 0 for Init, 1 for Join
   QHBoxLayout *hlayout_;
   QLabel *info_label_;
-  QLineEdit *first_input_, *second_input_, *third_input_;
+  QLineEdit *first_input_, *second_input_;
   QComboBox *combo_box_;
 };
 
@@ -80,8 +80,7 @@ class WaitWidget : public ContentWidget {
   Q_OBJECT
 
  public:
-  explicit WaitWidget(MainWindow *parent, const GameType type,
-                      const wstring &ip, bool is_owner);
+  explicit WaitWidget(MainWindow *parent, const GameType type, bool is_owner);
   ~WaitWidget();
   void SetInfo(const wstring &info);
   bool AddPlayer(const unsigned short id, const wstring &player_name,

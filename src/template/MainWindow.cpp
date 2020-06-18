@@ -72,10 +72,9 @@ void MainWindow::DrawHomePage() {
 
 void MainWindow::SetInfo(const wstring &info) { content_->SetInfo(info); }
 
-void MainWindow::DrawWaitingPage(const GameType type, const wstring &ip,
-                                 bool is_owner) {
+void MainWindow::DrawWaitingPage(const GameType type, bool is_owner) {
   delete content_;
-  content_ = new WaitWidget(this, type, ip, is_owner);
+  content_ = new WaitWidget(this, type, is_owner);
   setCentralWidget(content_);
 }
 
