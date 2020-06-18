@@ -3,6 +3,7 @@
 #include "MainWindow.h"
 
 #include <QDebug>
+#include <QLabel>
 #include <QWidget>
 #include <string>
 using std::wstring;
@@ -10,7 +11,6 @@ using std::wstring;
 class MainWindow;
 
 QT_BEGIN_NAMESPACE
-class QLabel;
 class QLineEdit;
 class QComboBox;
 class QVBoxLayout;
@@ -98,4 +98,29 @@ class WaitWidget : public ContentWidget {
   QGridLayout *glayout_;
   QHBoxLayout *hlayout_;
   QLabel *info_label_;
+};
+
+class CardLabel : public QLabel {
+  Q_OBJECT
+
+ public:
+  explicit CardLabel(QWidget *parent, Card card, int width, int height,
+                     bool selectable = false);
+
+ private:
+  bool selectable_;
+  void mousePressEvent(QMouseEvent *event) override;
+};
+
+class PlayWidget : public ContentWidget {
+  Q_OBJECT
+
+ public:
+  explicit PlayWidget(MainWindow *parent, const GameType type,
+                      const wstring (&player_name)[4],
+                      const unsigned short number_of_cards[4],
+                      const double network_status[4],
+                      const bool controlled_by_bot[4]);
+  ~PlayWidget();
+  void SetInfo(const wstring &info);
 };

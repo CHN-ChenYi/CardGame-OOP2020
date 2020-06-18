@@ -25,7 +25,7 @@ enum Suit {
 struct Card {
   Suit suit;
   // 1 for A, 11 for J, 12 for Q, 13 for K, 14 for small Joker, 15 for the big
-  // Joker
+  // Joker, 16 for unknown
   unsigned rank;
 };
 

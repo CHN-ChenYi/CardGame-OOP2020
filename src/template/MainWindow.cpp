@@ -98,3 +98,14 @@ bool MainWindow::SetNetworkStatus(const unsigned short id,
   if (!cur_widget) return false;
   return cur_widget->SetNetworkStatus(id, network_status);
 }
+
+void MainWindow::DrawPlayingPage(const GameType type,
+                                 const wstring (&player_name)[4],
+                                 const unsigned short number_of_cards[4],
+                                 const double network_status[4],
+                                 const bool controlled_by_bot[4]) {
+  delete content_;
+  content_ = new PlayWidget(this, type, player_name, number_of_cards,
+                            network_status, controlled_by_bot);
+  setCentralWidget(content_);
+}

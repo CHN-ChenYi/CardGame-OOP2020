@@ -7,7 +7,16 @@ extern MainWindow *window;
 void NewGame(const wstring &password, const wstring &player_name,
              const GameType type) {
   qDebug() << "New Game" << password << player_name << type;
-  window->DrawWaitingPage(type, L"127.0.0.1", true);
+  // window->DrawWaitingPage(type, L"127.0.0.1", true);
+
+  // id: 0 for the south(the player), 1 for the north,
+  //     2 for the east, 3 for the west
+  wstring player_names[4] = {L"south", L"north", L"east", L"west"};
+  unsigned short number_of_cards[4] = {10, 10, 10, 10};
+  double network_status[4] = {1, 0, 0.2, 0.7};
+  bool controlled_by_bot[4] = {false, true, false, false};
+  window->DrawPlayingPage(Winner, player_names, number_of_cards, network_status,
+                          controlled_by_bot);
 }
 void JoinGame(const wstring &ip, const wstring &password,
               const wstring &player_name) {
@@ -42,12 +51,6 @@ void Exit() {}
 // west status ranges from 0 to 1, 1 represents the best
 void MainWindow::DrawInitPage() {}
 void MainWindow::DrawJoinPage() {}
-void MainWindow::DrawPlayingPage(const GameType type,
-                                 const wstring (&player_name)[4],
-                                 const unsigned short number_of_cards[4],
-                                 const double network_status[4],
-                                 const bool controlled_by_bot[4]) {
-}  // for Playing Page
 bool MainWindow::UpdatePlayer(const unsigned short id,
                               const double network_status,
                               const bool controlled_by_bot) {

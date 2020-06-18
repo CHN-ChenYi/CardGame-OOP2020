@@ -267,3 +267,58 @@ bool WaitWidget::SetNetworkStatus(const unsigned short id,
 void WaitWidget::AddBot() { ::AddBot(); }
 
 void WaitWidget::StartGame() { ::StartGame(); }
+
+CardLabel::CardLabel(QWidget *parent, Card card, int width, int height,
+                     bool selectable)
+    : QLabel(parent), selectable_(selectable) {
+  QImage img;
+  if (card.rank > 13) {
+    if (card.rank == 14)
+      img.load(":/Resource/53.jpg");
+    else if (card.rank == 15)
+      img.load(":/Resource/54.jpg");
+    else if (card.rank == 16)
+      img.load(":/Resource/0.jpg");
+    else
+      qDebug() << "Unknown card rank";
+  } else {
+    const int id = int(card.suit) * 13 + card.rank;
+    char path[18];
+    sprintf(path, ":/Resource/%d.jpg", id);
+    img.load(path);
+  }
+  if (width <= height) {
+    setPixmap(QPixmap::fromImage(img.scaled(width, height, Qt::KeepAspectRatio,
+                                            Qt::SmoothTransformation)));
+  } else {
+    QMatrix matrix;
+    matrix.rotate(90.0);
+    setPixmap(QPixmap::fromImage(img.transformed(matrix, Qt::FastTransformation)
+                                     .scaled(width, height, Qt::KeepAspectRatio,
+                                             Qt::SmoothTransformation)));
+  }
+}
+
+void CardLabel::mousePressEvent(QMouseEvent *event) {
+  if (!selectable_) return;
+  const QRect cur_geo = geometry();
+  setGeometry(cur_geo.x(), cur_geo.y() == 0 ? cur_geo.height() * 0.25 : 0,
+              cur_geo.width(), cur_geo.height());
+}
+
+PlayWidget::PlayWidget(MainWindow *parent, const GameType type,
+                       const wstring (&player_name)[4],
+                       const unsigned short number_of_cards[4],
+                       const double network_status[4],
+                       const bool controlled_by_bot[4]) {
+  CardLabel *a = new CardLabel(this, Card{Diamond, 14}, 200, 300, true);
+  a->setFixedSize(200, 300);
+  CardLabel *b = new CardLabel(this, Card{Spade, 16}, 300, 200, false);
+  b->setFixedSize(300, 200);
+  b->setGeometry(50, 0, 0, 0);
+  a->raise();
+}
+
+PlayWidget::~PlayWidget() {}
+
+void PlayWidget::SetInfo(const wstring &info) {}
