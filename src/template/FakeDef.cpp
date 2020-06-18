@@ -4,15 +4,17 @@
 
 extern MainWindow *window;
 
-void MainWindow::StartNetworkEventLoop(int interval) {}
-void MainWindow::EndNetworkEventLoop() {}
-
-void NetworkEventProcess() {}
+void NetworkEventProcess() { qDebug() << "NetworkEventProcess"; }
 
 void NewGame(const wstring &password, const wstring &player_name,
              const GameType type) {
   qDebug() << "New Game" << password << player_name << type;
-  // window->DrawWaitingPage(type, L"127.0.0.1", true);
+  window->DrawWaitingPage(type, true);
+}
+
+void JoinGame(const wstring &password, const wstring &player_name) {
+  qDebug() << "Join Game" << password << player_name;
+  // window->DrawWaitingPage(Winner, false);
 
   // id: 0 for the south(the player), 1 for the north,
   //     2 for the east, 3 for the west
@@ -22,10 +24,6 @@ void NewGame(const wstring &password, const wstring &player_name,
   bool controlled_by_bot[4] = {false, true, false, false};
   window->DrawPlayingPage(Winner, player_names, number_of_cards, network_status,
                           controlled_by_bot, NULL);
-}
-void JoinGame(const wstring &password, const wstring &player_name) {
-  qDebug() << "Join Game" << password << player_name;
-  window->DrawWaitingPage(Winner, false);
 }
 
 wchar_t c[2] = L"0";

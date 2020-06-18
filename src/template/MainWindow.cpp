@@ -5,7 +5,7 @@
 
 #include "ContentWidget.h"
 
-MainWindow::MainWindow() {
+MainWindow::MainWindow() : timer_(NULL) {
   content_ = new HomeWidget(this);
   setCentralWidget(content_);
 
@@ -49,6 +49,20 @@ void MainWindow::About() {
 }
 
 void MainWindow::Manual() { QMessageBox::about(this, "Manual", "TODO"); }
+
+void MainWindow::StartNetworkEventLoop(int interval) {
+  if (timer_) delete timer_;
+  timer_ = new QTimer(this);
+  connect(timer_, &QTimer::timeout, this, &MainWindow::TimerEvent);
+  timer_->start(interval);
+}
+
+void MainWindow::TimerEvent() { ::NetworkEventProcess(); }
+
+void MainWindow::EndNetworkEventLoop() {
+  delete timer_;
+  timer_ = NULL;
+}
 
 void MainWindow::NewGame() {
   delete content_;

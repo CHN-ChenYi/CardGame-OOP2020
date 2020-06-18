@@ -80,11 +80,13 @@ class MainWindow : public QMainWindow {
 
  private:
   ContentWidget *content_;
+  QTimer *timer_;
 
  private slots:
   void Home();
   void About();
   void Manual();
+  void TimerEvent();
 
  public slots:
   void NewGame();
