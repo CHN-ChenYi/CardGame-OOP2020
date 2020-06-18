@@ -103,9 +103,10 @@ void MainWindow::DrawPlayingPage(const GameType type,
                                  const wstring (&player_name)[4],
                                  const unsigned short number_of_cards[4],
                                  const double network_status[4],
-                                 const bool controlled_by_bot[4]) {
+                                 const bool controlled_by_bot[4],
+                                 const Card cards[]) {
   delete content_;
   content_ = new PlayWidget(this, type, player_name, number_of_cards,
-                            network_status, controlled_by_bot);
+                            network_status, controlled_by_bot, cards);
   setCentralWidget(content_);
 }

@@ -310,7 +310,7 @@ PlayWidget::PlayWidget(MainWindow *parent, const GameType type,
                        const wstring (&player_name)[4],
                        const unsigned short number_of_cards[4],
                        const double network_status[4],
-                       const bool controlled_by_bot[4]) {
+                       const bool controlled_by_bot[4], const Card cards[]) {
   CardLabel *a = new CardLabel(this, Card{Diamond, 14}, 200, 300, true);
   a->setFixedSize(200, 300);
   CardLabel *b = new CardLabel(this, Card{Spade, 16}, 300, 200, false);

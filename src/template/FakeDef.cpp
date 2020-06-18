@@ -16,7 +16,7 @@ void NewGame(const wstring &password, const wstring &player_name,
   double network_status[4] = {1, 0, 0.2, 0.7};
   bool controlled_by_bot[4] = {false, true, false, false};
   window->DrawPlayingPage(Winner, player_names, number_of_cards, network_status,
-                          controlled_by_bot);
+                          controlled_by_bot, NULL);
 }
 void JoinGame(const wstring &ip, const wstring &password,
               const wstring &player_name) {

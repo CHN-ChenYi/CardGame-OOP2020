@@ -120,7 +120,7 @@ class PlayWidget : public ContentWidget {
                       const wstring (&player_name)[4],
                       const unsigned short number_of_cards[4],
                       const double network_status[4],
-                      const bool controlled_by_bot[4]);
+                      const bool controlled_by_bot[4], const Card cards[]);
   ~PlayWidget();
   void SetInfo(const wstring &info);
 };

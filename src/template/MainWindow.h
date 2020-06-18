@@ -63,7 +63,8 @@ class MainWindow : public QMainWindow {
   void DrawPlayingPage(const GameType type, const wstring (&player_name)[4],
                        const unsigned short number_of_cards[4],
                        const double network_status[4],
-                       const bool controlled_by_bot[4]);  // for Playing Page
+                       const bool controlled_by_bot[4],
+                       const Card cards[]);  // for Playing Page
   // true => success, false => fail
   bool UpdatePlayer(const unsigned short id, const double network_status,
                     const bool controlled_by_bot);  // for Playing Page
