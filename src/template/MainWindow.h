@@ -26,8 +26,10 @@ struct Card {
   Suit suit;
   // 1 for A, 11 for J, 12 for Q, 13 for K, 14 for small Joker, 15 for the big
   // Joker, 16 for unknown
-  unsigned rank;
+  unsigned short rank;
 };
+
+extern bool (*CardLess[2])(const Card &, const Card &);
 
 void NetworkEventProcess();
 void NewGame(const wstring &password, const wstring &player_name,

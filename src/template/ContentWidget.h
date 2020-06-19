@@ -2,10 +2,13 @@
 
 #include "MainWindow.h"
 
+#include <QBoxLayout>
 #include <QDebug>
 #include <QLabel>
 #include <QWidget>
+#include <set>
 #include <string>
+using std::multiset;
 using std::wstring;
 
 class MainWindow;
@@ -20,12 +23,14 @@ QT_END_NAMESPACE
 
 class NetworkCircle : public QWidget {
  public:
-  explicit NetworkCircle(QWidget *parent, const double network_status);
+  explicit NetworkCircle(QWidget *parent, const double network_status,
+                         const int height);
   void UpdateNetworkStatus(const double network_status);
 
  private:
   QWidget *parent_;
   double network_status_;
+  int height_;
   void paintEvent(QPaintEvent *) override;
 };
 
@@ -103,12 +108,59 @@ class CardLabel : public QLabel {
   Q_OBJECT
 
  public:
-  explicit CardLabel(QWidget *parent, Card card, int width, int height,
-                     bool selectable = false);
+  Card card_;
+  // direction true => vertical
+  explicit CardLabel(QWidget *parent, Card card, bool direction = true,
+                     bool selectable = false, int width = 0, int height = 0);
+  void SetMaxY(const int y);
+  void SetMinY(const int y);
 
  private:
-  bool selectable_;
+  QImage img;
+  bool direction_, selectable_;
+  int max_y, min_y;
+  void resizeEvent(QResizeEvent *event) override;
   void mousePressEvent(QMouseEvent *event) override;
+};
+
+struct PCardLabel {
+  CardLabel *value;
+  PCardLabel(CardLabel *value) : value(value) {}
+  bool operator=(const PCardLabel &rhs) const {
+    return value->card_.suit == rhs.value->card_.suit &&
+           value->card_.rank == rhs.value->card_.rank;
+  }
+};
+
+class DeckWidget : public QWidget {
+  Q_OBJECT
+
+ public:
+  // direction false => vertical
+  explicit DeckWidget(QWidget *parent, const bool direction,
+                      const bool selectable_, const GameType type,
+                      const wstring &player_name,
+                      const unsigned short number_of_cards,
+                      const double network_status, const bool controlled_by_bot,
+                      const Card cards[] = NULL);
+  ~DeckWidget();
+  void UpdatePlayer(const double network_status, const bool controlled_by_bot);
+  void UpdateCards(const short delta, const Card cards[] = NULL);
+  void RemoveCard(const Card card);
+  void resizeEvent(QResizeEvent *) override;
+
+ private:
+  bool direction_, selectable_;
+  QBoxLayout *main_layout_;
+  QWidget *cards_widget_;
+  QVBoxLayout *vlayout_;
+  QHBoxLayout *hlayout_;
+  NetworkCircle *network_circle_;
+  QLabel *bot_label_, *name_label_, *network_label_;
+  static bool WinnerCmp(const PCardLabel &lhs, const PCardLabel &rhs);
+  static bool HeartsCmp(const PCardLabel &lhs, const PCardLabel &rhs);
+  multiset<PCardLabel, bool (*)(const PCardLabel &, const PCardLabel &)>
+      *card_multiset;
 };
 
 class PlayWidget : public ContentWidget {

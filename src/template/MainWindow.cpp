@@ -5,6 +5,18 @@
 
 #include "ContentWidget.h"
 
+bool (*CardLess[2])(const Card &, const Card &) = {
+    [](const Card &lhs, const Card &rhs) {
+      static constexpr short rank_winner[17] = {
+          -1, 12, 13, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, -1};
+      return rank_winner[lhs.rank] < rank_winner[rhs.rank];
+    },
+    [](const Card &lhs, const Card &rhs) {
+      static constexpr short rank_heart[17] = {-1, 13, 1,  2,  3,  4,  5,  6, 7,
+                                               8,  9,  10, 11, 12, 14, 15, -1};
+      return rank_heart[lhs.rank] < rank_heart[rhs.rank];
+    }};
+
 MainWindow::MainWindow() : timer_(NULL) {
   content_ = new HomeWidget(this);
   setCentralWidget(content_);

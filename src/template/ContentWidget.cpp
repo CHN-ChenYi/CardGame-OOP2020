@@ -9,11 +9,18 @@
 #include <QPainter>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <algorithm>
 
 #include "MainWindow.h"
 
-NetworkCircle::NetworkCircle(QWidget *parent, const double network_status)
-    : QWidget(parent), parent_(parent), network_status_(network_status) {}
+NetworkCircle::NetworkCircle(QWidget *parent, const double network_status,
+                             const int height)
+    : QWidget(parent),
+      parent_(parent),
+      network_status_(network_status),
+      height_(height) {
+  setAttribute(Qt::WA_DeleteOnClose);
+}
 
 void NetworkCircle::UpdateNetworkStatus(const double network_status) {
   network_status_ = network_status;
@@ -21,11 +28,16 @@ void NetworkCircle::UpdateNetworkStatus(const double network_status) {
 }
 
 void NetworkCircle::paintEvent(QPaintEvent *) {
+  setGeometry(parent_->x() + parent_->width(),
+              parent_->y() + (parent_->height() - height_) / 2, height_,
+              height_);
   QPainter painter(this);
   painter.setPen(Qt::NoPen);
   painter.setBrush(
       QColor(255 * (1 - network_status_), 255 * network_status_, 0));
-  painter.drawEllipse(0, 0, parent_->height(), parent_->height());
+  painter.drawEllipse(0, 0, height_, height_);
+  setFixedWidth(height_ * 1.1);
+  setFixedWidth(height_ * 1.1);
 }
 
 ContentWidget::ContentWidget(QWidget *parent) : QWidget(parent) {}
@@ -72,7 +84,7 @@ void HomeWidget::SetBackgroundImage() {
   this->setPalette(palette);
 }
 
-void HomeWidget::resizeEvent(QResizeEvent *event) { SetBackgroundImage(); }
+void HomeWidget::resizeEvent(QResizeEvent *) { SetBackgroundImage(); }
 
 InitOrJoinWidget::InitOrJoinWidget(MainWindow *parent, bool widget_type)
     : ContentWidget(parent), widget_type_(widget_type) {
@@ -204,12 +216,13 @@ bool WaitWidget::AddPlayer(const unsigned short id, const wstring &player_name,
   network_label->setAttribute(Qt::WA_DeleteOnClose);
   network_label->setAlignment(Qt::AlignRight);
   glayout_->addWidget(network_label, id_top_, 1);
-  network_label->setMinimumHeight(
-      QFontMetrics(font()).boundingRect(network_label->text()).height() * 1.2);
+  // network_label->setMinimumHeight(
+  //    QFontMetrics(font()).boundingRect(network_label->text()).height()
+  //    * 1.1);
 
-  NetworkCircle *network_circle =
-      new NetworkCircle(network_label, network_status);
-  network_circle->setAttribute(Qt::WA_DeleteOnClose);
+  NetworkCircle *network_circle = new NetworkCircle(
+      network_label, network_status,
+      QFontMetrics(font()).boundingRect(network_label->text()).height());
   glayout_->addWidget(network_circle, id_top_, 2);
 
   id_top_++;
@@ -256,10 +269,12 @@ void WaitWidget::AddBot() { ::AddBot(); }
 
 void WaitWidget::StartGame() { ::StartGame(); }
 
-CardLabel::CardLabel(QWidget *parent, Card card, int width, int height,
-                     bool selectable)
-    : QLabel(parent), selectable_(selectable) {
-  QImage img;
+CardLabel::CardLabel(QWidget *parent, Card card, bool direction,
+                     bool selectable, int width, int height)
+    : QLabel(parent),
+      card_(card),
+      direction_(direction),
+      selectable_(selectable) {
   if (card.rank > 13) {
     if (card.rank == 14)
       img.load(":/Resource/53.jpg");
@@ -275,7 +290,7 @@ CardLabel::CardLabel(QWidget *parent, Card card, int width, int height,
     sprintf(path, ":/Resource/%d.jpg", id);
     img.load(path);
   }
-  if (width <= height) {
+  if (direction_) {
     setPixmap(QPixmap::fromImage(img.scaled(width, height, Qt::KeepAspectRatio,
                                             Qt::SmoothTransformation)));
   } else {
@@ -287,11 +302,169 @@ CardLabel::CardLabel(QWidget *parent, Card card, int width, int height,
   }
 }
 
-void CardLabel::mousePressEvent(QMouseEvent *event) {
+void CardLabel::SetMaxY(const int y) { max_y = y; }
+
+void CardLabel::SetMinY(const int y) { min_y = y; }
+
+void CardLabel::resizeEvent(QResizeEvent *) {
+  if (direction_) {
+    setPixmap(QPixmap::fromImage(img.scaled(
+        width(), height(), Qt::KeepAspectRatio, Qt::SmoothTransformation)));
+  } else {
+    QMatrix matrix;
+    matrix.rotate(90.0);
+    setPixmap(
+        QPixmap::fromImage(img.transformed(matrix, Qt::FastTransformation)
+                               .scaled(width(), height(), Qt::KeepAspectRatio,
+                                       Qt::SmoothTransformation)));
+  }
+}
+
+void CardLabel::mousePressEvent(QMouseEvent *) {
   if (!selectable_) return;
   const QRect cur_geo = geometry();
-  setGeometry(cur_geo.x(), cur_geo.y() == 0 ? cur_geo.height() * 0.25 : 0,
+  setGeometry(cur_geo.x(), cur_geo.y() == max_y ? min_y : max_y,
               cur_geo.width(), cur_geo.height());
+}
+
+DeckWidget::DeckWidget(QWidget *parent, const bool direction,
+                       const bool selectable, const GameType type,
+                       const wstring &player_name,
+                       const unsigned short number_of_cards,
+                       const double network_status,
+                       const bool controlled_by_bot, const Card cards[])
+    : QWidget(parent), direction_(direction), selectable_(selectable) {
+  main_layout_ = new QBoxLayout(direction_ ? QBoxLayout::LeftToRight
+                                           : QBoxLayout::TopToBottom);
+  main_layout_->setContentsMargins(0, 0, 0, 0);
+  main_layout_->setSpacing(0);
+
+  cards_widget_ = new QWidget();
+  main_layout_->addWidget(cards_widget_);
+
+  vlayout_ = new QVBoxLayout();
+
+  name_label_ = new QLabel(QString::fromStdWString(player_name));
+  vlayout_->addWidget(name_label_);
+
+  hlayout_ = new QHBoxLayout();
+  network_label_ = new QLabel("网络状态");
+  hlayout_->addWidget(network_label_);
+  network_label_->setMinimumHeight(QFontMetrics(network_label_->font())
+                                       .boundingRect(network_label_->text())
+                                       .height() *
+                                   1.2);
+  network_circle_ = new NetworkCircle(
+      network_label_, network_status,
+      QFontMetrics(font()).boundingRect(network_label_->text()).height());
+  hlayout_->addWidget(network_circle_);
+  vlayout_->addLayout(hlayout_);
+
+  bot_label_ = new QLabel(controlled_by_bot ? "机器人托管中" : "机器人未托管");
+  vlayout_->addWidget(bot_label_);
+  main_layout_->addLayout(vlayout_);
+
+  main_layout_->setStretch(0, 8);
+  main_layout_->setStretch(1, 1);
+
+  if (type)
+    card_multiset =
+        new multiset<PCardLabel, bool (*)(const PCardLabel &,
+                                          const PCardLabel &)>(WinnerCmp);
+  else
+    card_multiset =
+        new multiset<PCardLabel, bool (*)(const PCardLabel &,
+                                          const PCardLabel &)>(HeartsCmp);
+  if (cards) {
+    for (int i = 0; i < number_of_cards; i++)
+      card_multiset->insert(
+          new CardLabel(cards_widget_, cards[i], direction_, selectable_));
+  } else {
+    for (int i = 0; i < number_of_cards; i++)
+      card_multiset->insert(new CardLabel(cards_widget_, Card{Club, 16},
+                                          direction_, selectable_));
+  }
+
+  setLayout(main_layout_);
+}
+
+DeckWidget::~DeckWidget() {}
+
+bool DeckWidget::WinnerCmp(const PCardLabel &lhs, const PCardLabel &rhs) {
+  const Card &lhs_card = lhs.value->card_;
+  const Card &rhs_card = rhs.value->card_;
+  return lhs_card.suit != rhs_card.suit ? lhs_card.suit < rhs_card.suit
+                                        : CardLess[Winner](lhs_card, rhs_card);
+};
+
+bool DeckWidget::HeartsCmp(const PCardLabel &lhs, const PCardLabel &rhs) {
+  const Card &lhs_card = lhs.value->card_;
+  const Card &rhs_card = rhs.value->card_;
+  return lhs_card.rank != rhs_card.rank ? CardLess[Hearts](lhs_card, rhs_card)
+                                        : lhs_card.suit < rhs_card.suit;
+};
+
+void DeckWidget::UpdatePlayer(const double network_status,
+                              const bool controlled_by_bot) {
+  network_circle_->UpdateNetworkStatus(network_status);
+  bot_label_->setText(controlled_by_bot ? "机器人托管中" : "机器人未托管");
+  repaint();
+}
+
+void DeckWidget::UpdateCards(const short delta, const Card cards[]) {
+  if (delta > 0) {
+    for (int i = 0; i < delta; i++)
+      card_multiset->erase(card_multiset->begin());
+  } else {
+    const short delta_true = delta * -1;
+    if (cards) {
+      for (int i = 0; i < delta_true; i++)
+        card_multiset->insert(
+            new CardLabel(cards_widget_, cards[i], direction_, selectable_));
+    } else {
+      for (int i = 0; i < delta_true; i++)
+        card_multiset->insert(new CardLabel(cards_widget_, Card{Club, 16},
+                                            direction_, selectable_));
+    }
+  }
+  repaint();
+}
+
+void DeckWidget::RemoveCard(const Card card) {
+  card_multiset->erase(card_multiset->find(new CardLabel(cards_widget_, card)));
+  repaint();
+}
+
+void DeckWidget::resizeEvent(QResizeEvent *) {
+  const int height = cards_widget_->height();
+  const int width = cards_widget_->width();
+  if (direction_) {
+    const int base_len = std::min<int>(height / (3 + selectable_),
+                                       width / (card_multiset->size() + 1));
+    int cur_x = (width - base_len * (card_multiset->size() + 1)) / 2;
+    const int min_y = (height - base_len * (3 + selectable_)) / 2;
+    const int max_y = min_y + base_len * selectable_;
+    // int cur_x = 0, min_y = 0, max_y = 100;
+    for (auto &card_label : *card_multiset) {
+      if (selectable_) {
+        card_label.value->SetMinY(min_y);
+        card_label.value->SetMaxY(max_y);
+      }
+      card_label.value->setGeometry(cur_x, max_y, base_len * 2, base_len * 3);
+      card_label.value->raise();
+      cur_x += base_len;
+    }
+  } else {
+    const int base_len =
+        std::min<int>(height / (card_multiset->size() + 1), width / 3);
+    int cur_y = (height - base_len * (card_multiset->size() + 1)) / 2;
+    const int base_x = (width - base_len * 3) / 2;
+    for (auto &card_label : *card_multiset) {
+      card_label.value->setGeometry(base_x, cur_y, base_len * 3, base_len * 2);
+      card_label.value->raise();
+      cur_y += base_len;
+    }
+  }
 }
 
 PlayWidget::PlayWidget(MainWindow *parent, const GameType type,
@@ -299,12 +472,14 @@ PlayWidget::PlayWidget(MainWindow *parent, const GameType type,
                        const unsigned short number_of_cards[4],
                        const double network_status[4],
                        const bool controlled_by_bot[4], const Card cards[]) {
-  CardLabel *a = new CardLabel(this, Card{Diamond, 14}, 200, 300, true);
-  a->setFixedSize(200, 300);
-  CardLabel *b = new CardLabel(this, Card{Spade, 16}, 300, 200, false);
-  b->setFixedSize(300, 200);
-  b->setGeometry(50, 0, 0, 0);
-  a->raise();
+  QHBoxLayout *y = new QHBoxLayout();
+  DeckWidget *x =
+      new DeckWidget(this, false, false, Winner, L"mine", 1, 0.25, true);
+  y->addWidget(x);
+  setLayout(y);
+  Card z[] = {{Club, 1}, {Diamond, 13}};
+  x->UpdateCards(-2, z);
+  x->RemoveCard(Card{Club, 1});
 }
 
 PlayWidget::~PlayWidget() {}
