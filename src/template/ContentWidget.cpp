@@ -334,21 +334,29 @@ DeckWidget::DeckWidget(QWidget *parent, const bool direction,
                        const double network_status,
                        const bool controlled_by_bot, const Card cards[])
     : QWidget(parent), direction_(direction), selectable_(selectable) {
+  if (player_name[0] == '\0') {
+    exist_ = false;
+    return;
+  }
+  exist_ = true;
+  // TODO:(TO/GA) 有 this 之后可以把全局删掉了？
   main_layout_ = new QBoxLayout(direction_ ? QBoxLayout::LeftToRight
                                            : QBoxLayout::TopToBottom);
   main_layout_->setContentsMargins(0, 0, 0, 0);
   main_layout_->setSpacing(0);
 
-  cards_widget_ = new QWidget();
+  cards_widget_ = new QWidget(this);
   main_layout_->addWidget(cards_widget_);
 
   vlayout_ = new QVBoxLayout();
+
+  if (selectable_) vlayout_->addWidget(new QLabel("", this));
 
   name_label_ = new QLabel(QString::fromStdWString(player_name));
   vlayout_->addWidget(name_label_);
 
   hlayout_ = new QHBoxLayout();
-  network_label_ = new QLabel("网络状态");
+  network_label_ = new QLabel("网络状态", this);
   hlayout_->addWidget(network_label_);
   network_label_->setMinimumHeight(QFontMetrics(network_label_->font())
                                        .boundingRect(network_label_->text())
@@ -360,7 +368,8 @@ DeckWidget::DeckWidget(QWidget *parent, const bool direction,
   hlayout_->addWidget(network_circle_);
   vlayout_->addLayout(hlayout_);
 
-  bot_label_ = new QLabel(controlled_by_bot ? "机器人托管中" : "机器人未托管");
+  bot_label_ =
+      new QLabel(controlled_by_bot ? "机器人托管中" : "机器人未托管", this);
   vlayout_->addWidget(bot_label_);
   main_layout_->addLayout(vlayout_);
 
@@ -388,7 +397,8 @@ DeckWidget::DeckWidget(QWidget *parent, const bool direction,
   setLayout(main_layout_);
 }
 
-DeckWidget::~DeckWidget() {}
+DeckWidget::~DeckWidget() {  // TODO
+}
 
 bool DeckWidget::WinnerCmp(const PCardLabel &lhs, const PCardLabel &rhs) {
   const Card &lhs_card = lhs.value->card_;
@@ -404,14 +414,17 @@ bool DeckWidget::HeartsCmp(const PCardLabel &lhs, const PCardLabel &rhs) {
                                         : lhs_card.suit < rhs_card.suit;
 };
 
-void DeckWidget::UpdatePlayer(const double network_status,
+bool DeckWidget::UpdatePlayer(const double network_status,
                               const bool controlled_by_bot) {
+  if (!exist_) return false;
   network_circle_->UpdateNetworkStatus(network_status);
   bot_label_->setText(controlled_by_bot ? "机器人托管中" : "机器人未托管");
   repaint();
+  return true;
 }
 
-void DeckWidget::UpdateCards(const short delta, const Card cards[]) {
+bool DeckWidget::UpdateCards(const short delta, const Card cards[]) {
+  if (!exist_) return false;
   if (delta > 0) {
     for (int i = 0; i < delta; i++)
       card_multiset->erase(card_multiset->begin());
@@ -428,11 +441,14 @@ void DeckWidget::UpdateCards(const short delta, const Card cards[]) {
     }
   }
   repaint();
+  return true;
 }
 
-void DeckWidget::RemoveCard(const Card card) {
+bool DeckWidget::RemoveCard(const Card card) {
+  if (!exist_) return false;
   card_multiset->erase(card_multiset->find(new CardLabel(cards_widget_, card)));
   repaint();
+  return true;
 }
 
 void DeckWidget::resizeEvent(QResizeEvent *) {
@@ -467,21 +483,89 @@ void DeckWidget::resizeEvent(QResizeEvent *) {
   }
 }
 
+// id: 0 for the south(the player), 1 for the north,
+//     2 for the east, 3 for the west
 PlayWidget::PlayWidget(MainWindow *parent, const GameType type,
                        const wstring (&player_name)[4],
                        const unsigned short number_of_cards[4],
                        const double network_status[4],
                        const bool controlled_by_bot[4], const Card cards[]) {
-  QHBoxLayout *y = new QHBoxLayout();
-  DeckWidget *x =
-      new DeckWidget(this, false, false, Winner, L"mine", 1, 0.25, true);
-  y->addWidget(x);
-  setLayout(y);
-  Card z[] = {{Club, 1}, {Diamond, 13}};
-  x->UpdateCards(-2, z);
-  x->RemoveCard(Card{Club, 1});
+  for (int i = 0; i < 4; i++)
+    deck[i] = new DeckWidget(this, i < 2, !i, type, player_name[i],
+                             number_of_cards[i], network_status[i],
+                             controlled_by_bot[i], i ? NULL : cards);
+
+  main_layout_ = new QHBoxLayout(this);
+  main_layout_->setMargin(0);
+  main_layout_->setSpacing(0);
+
+  QVBoxLayout *west_layout = new QVBoxLayout();
+  west_layout->addWidget(new QLabel("", this));
+  west_layout->addWidget(deck[3]);
+  west_layout->addWidget(new QLabel("", this));
+  west_layout->setStretch(0, 3);
+  west_layout->setStretch(1, 15);
+  west_layout->setStretch(2, 3);
+  main_layout_->addLayout(west_layout);
+
+  vlayout_ = new QVBoxLayout();
+  vlayout_->addWidget(deck[1]);
+
+  glayout_ = new QGridLayout();
+  // TODO
+  glayout_->setColumnStretch(0, 4);
+  glayout_->setColumnStretch(1, 5);
+  glayout_->setColumnStretch(2, 4);
+  glayout_->setRowStretch(0, 4);
+  glayout_->setRowStretch(1, 4);
+  glayout_->setColumnStretch(2, 4);
+  vlayout_->addLayout(glayout_);
+
+  QHBoxLayout *info_layout = new QHBoxLayout();
+  info_label_ = new QLabel(this);
+  info_label_->setSizePolicy(QSizePolicy::Expanding,
+                             QSizePolicy::MinimumExpanding);
+  info_layout->addWidget(info_label_);
+  QPushButton *skip_button = new QPushButton("跳过", this);
+  connect(skip_button, &QPushButton::released, this, &PlayWidget::Skip);
+  info_layout->addWidget(skip_button);
+  QPushButton *confirm_button = new QPushButton("确认", this);
+  connect(confirm_button, &QPushButton::released, this, &PlayWidget::Confirm);
+  info_layout->addWidget(confirm_button);
+  info_layout->addWidget(new QLabel("     ", this));
+  vlayout_->addLayout(info_layout);
+
+  vlayout_->addWidget(deck[0]);
+  vlayout_->setStretch(0, 3);
+  vlayout_->setStretch(1, 13);
+  vlayout_->setStretch(2, 1);
+  vlayout_->setStretch(3, 6);
+  main_layout_->addLayout(vlayout_);
+
+  QVBoxLayout *east_layout = new QVBoxLayout();
+  east_layout->addWidget(new QLabel("", this));
+  east_layout->addWidget(deck[2]);
+  east_layout->addWidget(new QLabel("", this));
+  east_layout->setStretch(0, 3);
+  east_layout->setStretch(1, 15);
+  east_layout->setStretch(2, 3);
+  main_layout_->addLayout(east_layout);
+
+  main_layout_->setStretch(0, 3);
+  main_layout_->setStretch(1, 15);
+  main_layout_->setStretch(2, 3);
+  setLayout(main_layout_);
 }
 
 PlayWidget::~PlayWidget() {}
 
-void PlayWidget::SetInfo(const wstring &info) {}
+void PlayWidget::SetInfo(const wstring &info) {
+  info_label_->setText(QString::fromStdWString(info));
+  QRect rect = QFontMetrics(font()).boundingRect(info_label_->text());
+  info_label_->setMinimumWidth(rect.width());
+  info_label_->setMinimumHeight(rect.height());
+}
+
+void PlayWidget::Skip() { qDebug() << "Skip"; }
+
+void PlayWidget::Confirm() { qDebug() << "Confirm"; }

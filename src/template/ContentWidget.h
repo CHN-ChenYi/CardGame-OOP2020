@@ -144,12 +144,13 @@ class DeckWidget : public QWidget {
                       const double network_status, const bool controlled_by_bot,
                       const Card cards[] = NULL);
   ~DeckWidget();
-  void UpdatePlayer(const double network_status, const bool controlled_by_bot);
-  void UpdateCards(const short delta, const Card cards[] = NULL);
-  void RemoveCard(const Card card);
+  bool UpdatePlayer(const double network_status, const bool controlled_by_bot);
+  bool UpdateCards(const short delta, const Card cards[] = NULL);
+  bool RemoveCard(const Card card);
   void resizeEvent(QResizeEvent *) override;
 
  private:
+  bool exist_;
   bool direction_, selectable_;
   QBoxLayout *main_layout_;
   QWidget *cards_widget_;
@@ -174,4 +175,15 @@ class PlayWidget : public ContentWidget {
                       const bool controlled_by_bot[4], const Card cards[]);
   ~PlayWidget();
   void SetInfo(const wstring &info);
+
+ private slots:
+  void Skip();
+  void Confirm();
+
+ private:
+  QHBoxLayout *main_layout_;
+  QVBoxLayout *vlayout_;
+  QGridLayout *glayout_;
+  QLabel *info_label_, *score_label[4];
+  DeckWidget *deck[4];
 };
