@@ -49,7 +49,7 @@ class HomeWidget : public ContentWidget {
  public:
   explicit HomeWidget(MainWindow *parent);
   ~HomeWidget();
-  void SetInfo(const wstring &info) {
+  void SetInfo(const wstring &) override {
     qDebug() << "Can't find HomeWidget::SetInfo";
   }
 
@@ -114,11 +114,12 @@ class CardLabel : public QLabel {
                      bool selectable = false, int width = 0, int height = 0);
   void SetMaxY(const int y);
   void SetMinY(const int y);
+  bool IsChoosen() const;
 
  private:
-  QImage img;
+  QImage img_;
   bool direction_, selectable_;
-  int max_y, min_y;
+  int max_y_, min_y_;
   void resizeEvent(QResizeEvent *event) override;
   void mousePressEvent(QMouseEvent *event) override;
 };
@@ -144,12 +145,15 @@ class DeckWidget : public QWidget {
                       const double network_status, const bool controlled_by_bot,
                       const Card cards[] = NULL);
   ~DeckWidget();
+  bool Exist() const;
   bool UpdatePlayer(const double network_status, const bool controlled_by_bot);
-  bool UpdateCards(const short delta, const Card cards[] = NULL);
+  void UpdateCards(const short delta, const Card cards[] = NULL);
   bool RemoveCard(const Card card);
-  void resizeEvent(QResizeEvent *) override;
+  unsigned short GetNumOfChoosenCard() const;
+  const Card *GetChoosenCard(const unsigned short num) const;
 
  private:
+  void resizeEvent(QResizeEvent *) override;
   bool exist_;
   bool direction_, selectable_;
   QBoxLayout *main_layout_;
@@ -157,11 +161,25 @@ class DeckWidget : public QWidget {
   QVBoxLayout *vlayout_;
   QHBoxLayout *hlayout_;
   NetworkCircle *network_circle_;
-  QLabel *bot_label_, *name_label_, *network_label_;
-  static bool WinnerCmp(const PCardLabel &lhs, const PCardLabel &rhs);
-  static bool HeartsCmp(const PCardLabel &lhs, const PCardLabel &rhs);
+  QLabel *bot_label_, *network_label_;
   multiset<PCardLabel, bool (*)(const PCardLabel &, const PCardLabel &)>
-      *card_multiset;
+      *card_multiset_;
+};
+
+class DeskWidget : public QWidget {
+  Q_OBJECT
+
+ public:
+  explicit DeskWidget(QWidget *parent, const bool direction,
+                      const GameType type, const unsigned short number_of_cards,
+                      const Card cards[] = NULL);
+
+ private:
+  void resizeEvent(QResizeEvent *) override;
+  bool direction_;
+  QLabel *text_label_;
+  multiset<PCardLabel, bool (*)(const PCardLabel &, const PCardLabel &)>
+      *card_multiset_;
 };
 
 class PlayWidget : public ContentWidget {
@@ -175,12 +193,20 @@ class PlayWidget : public ContentWidget {
                       const bool controlled_by_bot[4], const Card cards[]);
   ~PlayWidget();
   void SetInfo(const wstring &info);
+  bool UpdatePlayer(const unsigned short id, const double network_status,
+                    const bool controlled_by_bot);
+  bool UpdateCards(const unsigned short id, const short delta,
+                   const Card cards[] = NULL);
+  void UpdateStatistics(const unsigned short points[4]);
+  void EndGame(const bool win_or_lose);
 
  private slots:
   void Skip();
   void Confirm();
 
  private:
+  static const int pos_x[4], pos_y[4];
+  const GameType type_;
   QHBoxLayout *main_layout_;
   QVBoxLayout *vlayout_;
   QGridLayout *glayout_;

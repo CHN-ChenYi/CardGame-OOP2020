@@ -96,6 +96,10 @@ void MainWindow::DrawHomePage() {
   setCentralWidget(content_);
 }
 
+void MainWindow::DrawInitPage() { NewGame(); }
+
+void MainWindow::DrawJoinPage() { JoinGame(); }
+
 void MainWindow::SetInfo(const wstring &info) { content_->SetInfo(info); }
 
 void MainWindow::DrawWaitingPage(const GameType type, bool is_owner) {
@@ -134,4 +138,31 @@ void MainWindow::DrawPlayingPage(const GameType type,
   content_ = new PlayWidget(this, type, player_name, number_of_cards,
                             network_status, controlled_by_bot, cards);
   setCentralWidget(content_);
+}
+
+bool MainWindow::UpdatePlayer(const unsigned short id,
+                              const double network_status,
+                              const bool controlled_by_bot) {
+  PlayWidget *cur_widget = dynamic_cast<PlayWidget *>(content_);
+  if (!cur_widget) return false;
+  return cur_widget->UpdatePlayer(id, network_status, controlled_by_bot);
+}
+
+bool MainWindow::UpdateCards(const unsigned short id, const short delta,
+                             const Card cards[]) {
+  PlayWidget *cur_widget = dynamic_cast<PlayWidget *>(content_);
+  if (!cur_widget) return false;
+  return cur_widget->UpdateCards(id, delta, cards);
+}
+
+void MainWindow::UpdateStatistics(const unsigned short points[4]) {
+  PlayWidget *cur_widget = dynamic_cast<PlayWidget *>(content_);
+  if (!cur_widget) return;
+  cur_widget->UpdateStatistics(points);
+}
+
+void MainWindow::EndGame(const bool win_or_lose) {
+  PlayWidget *cur_widget = dynamic_cast<PlayWidget *>(content_);
+  if (!cur_widget) return;
+  return cur_widget->EndGame(win_or_lose);
 }
