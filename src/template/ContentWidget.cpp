@@ -694,6 +694,7 @@ bool PlayWidget::UpdateCards(const unsigned short id, const short delta,
     glayout_->addWidget(new DeskWidget(this, true, type_, delta, cards),
                         pos_x[id], pos_y[id]);
   }
+  return true;
 }
 
 void PlayWidget::UpdateStatistics(const unsigned short points[4]) {
