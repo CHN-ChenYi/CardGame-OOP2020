@@ -686,10 +686,17 @@ bool PlayWidget::UpdatePlayer(const unsigned short id,
 }
 
 bool PlayWidget::UpdateCards(const unsigned short id, const short delta,
-                             const Card cards[]) {
+                             const Card cards[], const bool show) {
   if (!deck[id]->Exist()) return false;
   deck[id]->UpdateCards(delta, cards);
-  if (delta >= 0) {
+  if (id == 0 && delta >= 0) {
+    if (delta > 0)
+      for (int i = 0; i < delta; i++) deck[0]->RemoveCard(cards[i]);
+    else
+      QCoreApplication::postEvent(
+          deck[0], new QResizeEvent(deck[0]->size(), deck[0]->size()));
+  }
+  if (show) {
     delete glayout_->itemAtPosition(pos_x[id], pos_y[id])->widget();
     glayout_->addWidget(new DeskWidget(this, true, type_, delta, cards),
                         pos_x[id], pos_y[id]);
@@ -727,20 +734,10 @@ void PlayWidget::EndGame(const bool win_or_lose) {
     ::Home();
 }
 
-void PlayWidget::Skip() {
-  if (::Play(NULL, 0)) {
-    QCoreApplication::postEvent(
-        deck[0], new QResizeEvent(deck[0]->size(), deck[0]->size()));
-    UpdateCards(0, 0);
-  }
-}
+void PlayWidget::Skip() { ::Play(NULL, 0); }
 
 void PlayWidget::Confirm() {
   const unsigned short num = deck[0]->GetNumOfChoosenCard();
   const Card *const cards = deck[0]->GetChoosenCard(num);
-  if (::Play(cards, num)) {
-    delete glayout_->itemAtPosition(2, 1)->widget();
-    glayout_->addWidget(new DeskWidget(this, true, type_, num, cards), 2, 1);
-    for (int i = 0; i < num; i++) deck[0]->RemoveCard(cards[i]);
-  }
+  ::Play(cards, num);
 }

@@ -149,10 +149,10 @@ bool MainWindow::UpdatePlayer(const unsigned short id,
 }
 
 bool MainWindow::UpdateCards(const unsigned short id, const short delta,
-                             const Card cards[]) {
+                             const Card cards[], const bool show) {
   PlayWidget *cur_widget = dynamic_cast<PlayWidget *>(content_);
   if (!cur_widget) return false;
-  return cur_widget->UpdateCards(id, delta, cards);
+  return cur_widget->UpdateCards(id, delta, cards, show);
 }
 
 void MainWindow::UpdateStatistics(const unsigned short points[4]) {

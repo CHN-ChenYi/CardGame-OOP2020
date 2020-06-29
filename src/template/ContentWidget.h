@@ -196,7 +196,7 @@ class PlayWidget : public ContentWidget {
   bool UpdatePlayer(const unsigned short id, const double network_status,
                     const bool controlled_by_bot);
   bool UpdateCards(const unsigned short id, const short delta,
-                   const Card cards[] = NULL);
+                   const Card cards[], const bool show);
   void UpdateStatistics(const unsigned short points[4]);
   bool ClearDesk(const unsigned short id);
   void EndGame(const bool win_or_lose);

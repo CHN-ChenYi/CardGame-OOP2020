@@ -44,12 +44,12 @@ void StartGame() {
 }
 
 // if return false, the cards will go back to players hand
-bool Play(const Card cards[], const unsigned short size) {
+void Play(const Card cards[], const unsigned short size) {
   unsigned short sta[4] = {(unsigned short)rand(), (unsigned short)rand(),
                            (unsigned short)rand(), (unsigned short)rand()};
+  window->UpdateCards(0, size, cards, true);
   if (!size) {
-    window->ClearDesk(0);
-    return false;
+    return;
   }
   window->UpdateStatistics(sta);
   window->UpdatePlayer(rand() % 4, rand() / RAND_MAX, rand() & 1);
@@ -67,7 +67,7 @@ bool Play(const Card cards[], const unsigned short size) {
   for (int i = 0; i < size; i++)
     qDebug() << cards[i].suit << " " << cards[i].rank;
   window->SetInfo(L"Play");
-  return true;
+  return;
 }
 void PlayAgain() { qDebug() << "play again"; }
 void Home() {
