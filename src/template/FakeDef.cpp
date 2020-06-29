@@ -22,8 +22,11 @@ void JoinGame(const wstring &password, const wstring &player_name) {
   unsigned short number_of_cards[4] = {10, 10, 10, 10};
   double network_status[4] = {1, 0, 0.2, 0.7};
   bool controlled_by_bot[4] = {false, true, false, false};
-  window->DrawPlayingPage(Hearts, player_names, number_of_cards, network_status,
+  window->DrawPlayingPage(Winner, player_names, number_of_cards, network_status,
                           controlled_by_bot, NULL);
+
+  Card cardss[1] = {Card{Spade, 2}};
+  window->UpdateCards(0, -1, cardss);
 }
 
 wchar_t c[2] = L"0";
@@ -47,15 +50,15 @@ bool Play(const Card cards[], const unsigned short size) {
   window->UpdateStatistics(sta);
   window->UpdatePlayer(rand() % 4, rand() / RAND_MAX, rand() & 1);
 
-  int num = rand() % 2;
-  Card cardss[abs(num)];
-  for (int i = 0; i < abs(num); i++) {
-    cardss[i] =
-        Card{rand() & 1 ? Club : Spade, (unsigned short)(rand() % 15 + 1)};
-  }
-  int id = rand() % 3 + 1;
+  int num = 1;
+  Card cardss[1] = {Card{Spade, 2}};
+  // for (int i = 0; i < abs(num); i++) {
+  //  cardss[i] =
+  //    Card{rand() & 1 ? Club : Spade, (unsigned short)(rand() % 15 + 1)};
+  //}
+  int id = 0;
   qDebug() << id << " " << num;
-  window->UpdateCards(id, num, cardss);
+  // window->UpdateCards(id, num, cardss);
 
   for (int i = 0; i < size; i++)
     qDebug() << cards[i].suit << " " << cards[i].rank;

@@ -599,6 +599,8 @@ PlayWidget::PlayWidget(MainWindow *parent, const GameType type,
   vlayout_->addWidget(deck[1]);
 
   glayout_ = new QGridLayout();
+  for (int i = 0; i < 4; i++)
+    glayout_->addWidget(new QWidget(this), pos_x[i], pos_y[i]);
   if (type == Hearts) {
     QGridLayout *score_layout = new QGridLayout();
     QLabel *score_text = new QLabel("得分", this);
@@ -610,7 +612,6 @@ PlayWidget::PlayWidget(MainWindow *parent, const GameType type,
         score_label[i]->setAlignment(Qt::AlignCenter);
         score_layout->addWidget(score_label[i], pos_x[i], pos_y[i]);
       }
-      glayout_->addWidget(new QWidget(this), pos_x[i], pos_y[i]);
     }
     for (int i = 0; i < 3; i++) {
       score_layout->setRowStretch(i, 1);
