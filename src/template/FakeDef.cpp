@@ -19,14 +19,17 @@ void JoinGame(const wstring &password, const wstring &player_name) {
   // id: 0 for the south(the player), 1 for the north,
   //     2 for the east, 3 for the west
   wstring player_names[4] = {L"south", L"north", L"east", L"west"};
-  unsigned short number_of_cards[4] = {10, 10, 10, 10};
+  unsigned short number_of_cards[4] = {0, 10, 10, 10};
   double network_status[4] = {1, 0, 0.2, 0.7};
   bool controlled_by_bot[4] = {false, true, false, false};
   window->DrawPlayingPage(Winner, player_names, number_of_cards, network_status,
                           controlled_by_bot, NULL);
 
-  Card cardss[1] = {Card{Spade, 2}};
-  window->UpdateCards(0, -1, cardss);
+  for (int i = 0; i < 10; i++) {
+    Card cardss[1] = {
+        Card{Suit(rand() % 4), (unsigned short)(rand() % 15 + 1)}};
+    window->UpdateCards(0, -1, cardss);
+  }
 }
 
 wchar_t c[2] = L"0";
@@ -48,6 +51,7 @@ void Play(const Card cards[], const unsigned short size) {
   unsigned short sta[4] = {(unsigned short)rand(), (unsigned short)rand(),
                            (unsigned short)rand(), (unsigned short)rand()};
   window->UpdateCards(0, size, cards, true);
+  window->UpdateCards(1, size, cards, true);
   if (!size) {
     return;
   }

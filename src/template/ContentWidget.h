@@ -147,8 +147,8 @@ class DeckWidget : public QWidget {
   ~DeckWidget();
   bool Exist() const;
   bool UpdatePlayer(const double network_status, const bool controlled_by_bot);
-  void UpdateCards(const short delta, const Card cards[] = NULL);
-  bool RemoveCard(const Card card);
+  void UpdateCards(const short delta, const Card cards[],
+                   const bool is_not_south);
   unsigned short GetNumOfChoosenCard() const;
   const Card *GetChoosenCard(const unsigned short num) const;
 

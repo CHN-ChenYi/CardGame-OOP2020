@@ -432,12 +432,22 @@ bool DeckWidget::UpdatePlayer(const double network_status,
   return true;
 }
 
-void DeckWidget::UpdateCards(const short delta, const Card cards[]) {
+void DeckWidget::UpdateCards(const short delta, const Card cards[],
+                             const bool is_not_south) {
   if (delta > 0) {
-    for (int i = 0; i < delta; i++) {
-      auto pcard = card_multiset_->begin();
-      pcard->value->close();
-      card_multiset_->erase(pcard);
+    if (is_not_south) {
+      for (int i = 0; i < delta; i++) {
+        auto pcard = card_multiset_->begin();
+        pcard->value->close();
+        card_multiset_->erase(pcard);
+      }
+    } else {
+      for (int i = 0; i < delta; i++) {
+        auto pcard =
+            card_multiset_->find(new CardLabel(cards_widget_, cards[i]));
+        pcard->value->close();
+        card_multiset_->erase(pcard);
+      }
     }
   } else {
     const short delta_true = delta * -1;
@@ -452,15 +462,6 @@ void DeckWidget::UpdateCards(const short delta, const Card cards[]) {
     }
   }
   QCoreApplication::postEvent(this, new QResizeEvent(size(), size()));
-}
-
-bool DeckWidget::RemoveCard(const Card card) {
-  if (!exist_) return false;
-  auto pcard = card_multiset_->find(new CardLabel(cards_widget_, card));
-  pcard->value->close();
-  card_multiset_->erase(pcard);
-  QCoreApplication::postEvent(this, new QResizeEvent(size(), size()));
-  return true;
 }
 
 unsigned short DeckWidget::GetNumOfChoosenCard() const {
@@ -688,14 +689,10 @@ bool PlayWidget::UpdatePlayer(const unsigned short id,
 bool PlayWidget::UpdateCards(const unsigned short id, const short delta,
                              const Card cards[], const bool show) {
   if (!deck[id]->Exist()) return false;
-  deck[id]->UpdateCards(delta, cards);
-  if (id == 0 && delta >= 0) {
-    if (delta > 0)
-      for (int i = 0; i < delta; i++) deck[0]->RemoveCard(cards[i]);
-    else
-      QCoreApplication::postEvent(
-          deck[0], new QResizeEvent(deck[0]->size(), deck[0]->size()));
-  }
+  deck[id]->UpdateCards(delta, cards, id);
+  if (id == 0 && delta == 0)
+    QCoreApplication::postEvent(
+        deck[0], new QResizeEvent(deck[0]->size(), deck[0]->size()));
   if (show) {
     delete glayout_->itemAtPosition(pos_x[id], pos_y[id])->widget();
     glayout_->addWidget(new DeskWidget(this, true, type_, delta, cards),
