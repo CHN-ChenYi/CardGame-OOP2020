@@ -87,6 +87,7 @@ class MainWindow : public QMainWindow {
 
  private slots:
   void Home();
+  void Exit();
   void About();
   void Manual();
   void TimerEvent();

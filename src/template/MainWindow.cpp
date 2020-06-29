@@ -27,7 +27,7 @@ MainWindow::MainWindow() : timer_(NULL) {
   QAction *exit_act = new QAction("Exit", this);
   // exit_act->setShortcuts(QKeySequence::Quit);
   // exit_act->setStatusTip("Exit the application");
-  connect(exit_act, &QAction::triggered, this, &QWidget::close);
+  connect(exit_act, &QAction::triggered, this, &MainWindow::Exit);
 
   QAction *manual_act = new QAction("Manual", this);
   connect(manual_act, &QAction::triggered, this, &MainWindow::Manual);
@@ -55,6 +55,11 @@ MainWindow::MainWindow() : timer_(NULL) {
 }
 
 void MainWindow::Home() { ::Home(); }
+
+void MainWindow::Exit() {
+  ::Exit();
+  close();
+}
 
 void MainWindow::About() {
   QMessageBox::about(this, "About", "一个面向对象课程中完成的纸牌游戏");
