@@ -75,6 +75,7 @@ class MainWindow : public QMainWindow {
   // delta minus 0 means player draws some cards
   bool UpdateCards(const unsigned short id, const short delta,
                    const Card cards[] = NULL);  // for Playing Page
+  bool ClearDesk(const unsigned short id);      // for Playing Page
   // for Playing Hearts Page
   void UpdateStatistics(const unsigned short points[4]);
   void EndGame(const bool win_or_lose);  // for Playing Page

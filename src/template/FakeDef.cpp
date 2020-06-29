@@ -47,6 +47,10 @@ void StartGame() {
 bool Play(const Card cards[], const unsigned short size) {
   unsigned short sta[4] = {(unsigned short)rand(), (unsigned short)rand(),
                            (unsigned short)rand(), (unsigned short)rand()};
+  if (!size) {
+    window->ClearDesk(0);
+    return false;
+  }
   window->UpdateStatistics(sta);
   window->UpdatePlayer(rand() % 4, rand() / RAND_MAX, rand() & 1);
 

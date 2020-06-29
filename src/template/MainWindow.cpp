@@ -161,6 +161,12 @@ void MainWindow::UpdateStatistics(const unsigned short points[4]) {
   cur_widget->UpdateStatistics(points);
 }
 
+bool MainWindow::ClearDesk(const unsigned short id) {
+  PlayWidget *cur_widget = dynamic_cast<PlayWidget *>(content_);
+  if (!cur_widget) return false;
+  return cur_widget->ClearDesk(id);
+}
+
 void MainWindow::EndGame(const bool win_or_lose) {
   PlayWidget *cur_widget = dynamic_cast<PlayWidget *>(content_);
   if (!cur_widget) return;

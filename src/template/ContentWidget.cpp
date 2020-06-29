@@ -690,11 +690,17 @@ bool PlayWidget::UpdateCards(const unsigned short id, const short delta,
   if (!deck[id]->Exist()) return false;
   deck[id]->UpdateCards(delta, cards);
   if (delta >= 0) {
-    auto old = glayout_->itemAtPosition(pos_x[id], pos_y[id])->widget();
-    delete old;
+    delete glayout_->itemAtPosition(pos_x[id], pos_y[id])->widget();
     glayout_->addWidget(new DeskWidget(this, true, type_, delta, cards),
                         pos_x[id], pos_y[id]);
   }
+  return true;
+}
+
+bool PlayWidget::ClearDesk(const unsigned short id) {
+  if (!deck[id]->Exist()) return false;
+  delete glayout_->itemAtPosition(pos_x[id], pos_y[id])->widget();
+  glayout_->addWidget(new QWidget(this));
   return true;
 }
 
