@@ -339,16 +339,16 @@ static bool (*PCardLabelLess[2])(const PCardLabel &, const PCardLabel &) = {
     [](const PCardLabel &lhs, const PCardLabel &rhs) {
       const Card &lhs_card = lhs.value->card_;
       const Card &rhs_card = rhs.value->card_;
-      return lhs_card.suit != rhs_card.suit
-                 ? lhs_card.suit < rhs_card.suit
-                 : CardLess[Winner](lhs_card, rhs_card);
+      return lhs_card.rank != rhs_card.rank
+                 ? CardLess[Winner](lhs_card, rhs_card)
+                 : lhs_card.suit < rhs_card.suit;
     },
     [](const PCardLabel &lhs, const PCardLabel &rhs) {
       const Card &lhs_card = lhs.value->card_;
       const Card &rhs_card = rhs.value->card_;
-      return lhs_card.rank != rhs_card.rank
-                 ? CardLess[Hearts](lhs_card, rhs_card)
-                 : lhs_card.suit < rhs_card.suit;
+      return lhs_card.suit != rhs_card.suit
+                 ? lhs_card.suit < rhs_card.suit
+                 : CardLess[Hearts](lhs_card, rhs_card);
     }};
 
 DeckWidget::DeckWidget(QWidget *parent, const bool direction,
