@@ -147,8 +147,8 @@ class DeckWidget : public QWidget {
   ~DeckWidget();
   bool Exist() const;
   bool UpdatePlayer(const double network_status, const bool controlled_by_bot);
-  void UpdateCards(const short delta, const Card cards[] = NULL);
-  bool RemoveCard(const Card card);
+  void UpdateCards(const short delta, const Card cards[],
+                   const bool is_not_south);
   unsigned short GetNumOfChoosenCard() const;
   const Card *GetChoosenCard(const unsigned short num) const;
 
@@ -171,7 +171,7 @@ class DeskWidget : public QWidget {
 
  public:
   explicit DeskWidget(QWidget *parent, const bool direction,
-                      const GameType type, const unsigned short number_of_cards,
+                      const GameType type, const short number_of_cards,
                       const Card cards[] = NULL);
 
  private:
@@ -196,8 +196,9 @@ class PlayWidget : public ContentWidget {
   bool UpdatePlayer(const unsigned short id, const double network_status,
                     const bool controlled_by_bot);
   bool UpdateCards(const unsigned short id, const short delta,
-                   const Card cards[] = NULL);
+                   const Card cards[], const bool show);
   void UpdateStatistics(const unsigned short points[4]);
+  bool ClearDesk(const unsigned short id);
   void EndGame(const bool win_or_lose);
 
  private slots:

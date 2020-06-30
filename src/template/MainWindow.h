@@ -38,7 +38,7 @@ void JoinGame(const wstring &password, const wstring &player_name);
 void AddBot();
 void StartGame();
 // true => success, false => (fail and then SetInfo) / (the game has ended)
-bool Play(const Card cards[], const unsigned short size);
+void Play(const Card cards[], const unsigned short size);
 void PlayAgain();
 void Home();
 void Exit();
@@ -74,7 +74,9 @@ class MainWindow : public QMainWindow {
                     const bool controlled_by_bot);  // for Playing Page
   // delta minus 0 means player draws some cards
   bool UpdateCards(const unsigned short id, const short delta,
-                   const Card cards[] = NULL);  // for Playing Page
+                   const Card cards[] = NULL,
+                   const bool show = false);  // for Playing Page
+  bool ClearDesk(const unsigned short id);    // for Playing Page
   // for Playing Hearts Page
   void UpdateStatistics(const unsigned short points[4]);
   void EndGame(const bool win_or_lose);  // for Playing Page
@@ -85,6 +87,7 @@ class MainWindow : public QMainWindow {
 
  private slots:
   void Home();
+  void Exit();
   void About();
   void Manual();
   void TimerEvent();

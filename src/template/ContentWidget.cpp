@@ -339,16 +339,16 @@ static bool (*PCardLabelLess[2])(const PCardLabel &, const PCardLabel &) = {
     [](const PCardLabel &lhs, const PCardLabel &rhs) {
       const Card &lhs_card = lhs.value->card_;
       const Card &rhs_card = rhs.value->card_;
-      return lhs_card.suit != rhs_card.suit
-                 ? lhs_card.suit < rhs_card.suit
-                 : CardLess[Winner](lhs_card, rhs_card);
+      return lhs_card.rank != rhs_card.rank
+                 ? CardLess[Winner](lhs_card, rhs_card)
+                 : lhs_card.suit < rhs_card.suit;
     },
     [](const PCardLabel &lhs, const PCardLabel &rhs) {
       const Card &lhs_card = lhs.value->card_;
       const Card &rhs_card = rhs.value->card_;
-      return lhs_card.rank != rhs_card.rank
-                 ? CardLess[Hearts](lhs_card, rhs_card)
-                 : lhs_card.suit < rhs_card.suit;
+      return lhs_card.suit != rhs_card.suit
+                 ? lhs_card.suit < rhs_card.suit
+                 : CardLess[Hearts](lhs_card, rhs_card);
     }};
 
 DeckWidget::DeckWidget(QWidget *parent, const bool direction,
@@ -432,35 +432,36 @@ bool DeckWidget::UpdatePlayer(const double network_status,
   return true;
 }
 
-void DeckWidget::UpdateCards(const short delta, const Card cards[]) {
+void DeckWidget::UpdateCards(const short delta, const Card cards[],
+                             const bool is_not_south) {
   if (delta > 0) {
-    for (int i = 0; i < delta; i++) {
-      auto pcard = card_multiset_->begin();
-      pcard->value->close();
-      card_multiset_->erase(pcard);
+    if (is_not_south) {
+      for (int i = 0; i < delta; i++) {
+        auto pcard = card_multiset_->begin();
+        pcard->value->close();
+        card_multiset_->erase(pcard);
+      }
+    } else {
+      for (int i = 0; i < delta; i++) {
+        auto pcard =
+            card_multiset_->find(new CardLabel(cards_widget_, cards[i]));
+        pcard->value->close();
+        card_multiset_->erase(pcard);
+      }
     }
   } else {
     const short delta_true = delta * -1;
-    if (cards) {
-      for (int i = 0; i < delta_true; i++)
-        card_multiset_->insert(
-            new CardLabel(cards_widget_, cards[i], direction_, selectable_));
-    } else {
+    if (is_not_south) {
       for (int i = 0; i < delta_true; i++)
         card_multiset_->insert(new CardLabel(cards_widget_, Card{Club, 16},
                                              direction_, selectable_));
+    } else {
+      for (int i = 0; i < delta_true; i++)
+        card_multiset_->insert(
+            new CardLabel(cards_widget_, cards[i], direction_, selectable_));
     }
   }
   QCoreApplication::postEvent(this, new QResizeEvent(size(), size()));
-}
-
-bool DeckWidget::RemoveCard(const Card card) {
-  if (!exist_) return false;
-  auto pcard = card_multiset_->find(new CardLabel(cards_widget_, card));
-  pcard->value->close();
-  card_multiset_->erase(pcard);
-  QCoreApplication::postEvent(this, new QResizeEvent(size(), size()));
-  return true;
 }
 
 unsigned short DeckWidget::GetNumOfChoosenCard() const {
@@ -512,8 +513,8 @@ void DeckWidget::resizeEvent(QResizeEvent *) {
 }
 
 DeskWidget::DeskWidget(QWidget *parent, const bool direction,
-                       const GameType type,
-                       const unsigned short number_of_cards, const Card cards[])
+                       const GameType type, const short number_of_cards,
+                       const Card cards[])
     : QWidget(parent), direction_(direction) {
   setAttribute(Qt::WA_DeleteOnClose);
   if (number_of_cards <= 0) {
@@ -522,7 +523,7 @@ DeskWidget::DeskWidget(QWidget *parent, const bool direction,
       text_label_->setText("已跳过");
     } else {
       std::wostringstream new_text;
-      new_text << "已摸" << -number_of_cards << "张牌";
+      new_text << L"已摸" << -number_of_cards << L"张牌";
       text_label_->setText(QString::fromStdWString(new_text.str()));
     }
     text_label_->setAlignment(Qt::AlignCenter);
@@ -599,6 +600,8 @@ PlayWidget::PlayWidget(MainWindow *parent, const GameType type,
   vlayout_->addWidget(deck[1]);
 
   glayout_ = new QGridLayout();
+  for (int i = 0; i < 4; i++)
+    glayout_->addWidget(new QWidget(this), pos_x[i], pos_y[i]);
   if (type == Hearts) {
     QGridLayout *score_layout = new QGridLayout();
     QLabel *score_text = new QLabel("得分", this);
@@ -610,7 +613,6 @@ PlayWidget::PlayWidget(MainWindow *parent, const GameType type,
         score_label[i]->setAlignment(Qt::AlignCenter);
         score_layout->addWidget(score_label[i], pos_x[i], pos_y[i]);
       }
-      glayout_->addWidget(new QWidget(this), pos_x[i], pos_y[i]);
     }
     for (int i = 0; i < 3; i++) {
       score_layout->setRowStretch(i, 1);
@@ -685,15 +687,25 @@ bool PlayWidget::UpdatePlayer(const unsigned short id,
 }
 
 bool PlayWidget::UpdateCards(const unsigned short id, const short delta,
-                             const Card cards[]) {
+                             const Card cards[], const bool show) {
   if (!deck[id]->Exist()) return false;
-  deck[id]->UpdateCards(delta, cards);
-  if (delta >= 0) {
-    auto old = glayout_->itemAtPosition(pos_x[id], pos_y[id])->widget();
-    delete old;
+  deck[id]->UpdateCards(delta, cards, id);
+  if (id == 0 && delta == 0)
+    QCoreApplication::postEvent(
+        deck[0], new QResizeEvent(deck[0]->size(), deck[0]->size()));
+  if (show) {
+    delete glayout_->itemAtPosition(pos_x[id], pos_y[id])->widget();
     glayout_->addWidget(new DeskWidget(this, true, type_, delta, cards),
                         pos_x[id], pos_y[id]);
   }
+  return true;
+}
+
+bool PlayWidget::ClearDesk(const unsigned short id) {
+  if (!deck[id]->Exist()) return false;
+  delete glayout_->itemAtPosition(pos_x[id], pos_y[id])->widget();
+  glayout_->addWidget(new QWidget(this), pos_x[id], pos_y[id]);
+  return true;
 }
 
 void PlayWidget::UpdateStatistics(const unsigned short points[4]) {
@@ -719,20 +731,10 @@ void PlayWidget::EndGame(const bool win_or_lose) {
     ::Home();
 }
 
-void PlayWidget::Skip() {
-  if (::Play(NULL, 0)) {
-    QCoreApplication::postEvent(
-        deck[0], new QResizeEvent(deck[0]->size(), deck[0]->size()));
-    UpdateCards(0, 0);
-  }
-}
+void PlayWidget::Skip() { ::Play(NULL, 0); }
 
 void PlayWidget::Confirm() {
   const unsigned short num = deck[0]->GetNumOfChoosenCard();
   const Card *const cards = deck[0]->GetChoosenCard(num);
-  if (::Play(cards, num)) {
-    delete glayout_->itemAtPosition(2, 1)->widget();
-    glayout_->addWidget(new DeskWidget(this, true, type_, num, cards), 2, 1);
-    for (int i = 0; i < num; i++) deck[0]->RemoveCard(cards[i]);
-  }
+  ::Play(cards, num);
 }

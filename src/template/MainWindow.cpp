@@ -27,7 +27,7 @@ MainWindow::MainWindow() : timer_(NULL) {
   QAction *exit_act = new QAction("Exit", this);
   // exit_act->setShortcuts(QKeySequence::Quit);
   // exit_act->setStatusTip("Exit the application");
-  connect(exit_act, &QAction::triggered, this, &QWidget::close);
+  connect(exit_act, &QAction::triggered, this, &MainWindow::Exit);
 
   QAction *manual_act = new QAction("Manual", this);
   connect(manual_act, &QAction::triggered, this, &MainWindow::Manual);
@@ -55,6 +55,11 @@ MainWindow::MainWindow() : timer_(NULL) {
 }
 
 void MainWindow::Home() { ::Home(); }
+
+void MainWindow::Exit() {
+  ::Exit();
+  close();
+}
 
 void MainWindow::About() {
   QMessageBox::about(this, "About", "一个面向对象课程中完成的纸牌游戏");
@@ -149,16 +154,22 @@ bool MainWindow::UpdatePlayer(const unsigned short id,
 }
 
 bool MainWindow::UpdateCards(const unsigned short id, const short delta,
-                             const Card cards[]) {
+                             const Card cards[], const bool show) {
   PlayWidget *cur_widget = dynamic_cast<PlayWidget *>(content_);
   if (!cur_widget) return false;
-  return cur_widget->UpdateCards(id, delta, cards);
+  return cur_widget->UpdateCards(id, delta, cards, show);
 }
 
 void MainWindow::UpdateStatistics(const unsigned short points[4]) {
   PlayWidget *cur_widget = dynamic_cast<PlayWidget *>(content_);
   if (!cur_widget) return;
   cur_widget->UpdateStatistics(points);
+}
+
+bool MainWindow::ClearDesk(const unsigned short id) {
+  PlayWidget *cur_widget = dynamic_cast<PlayWidget *>(content_);
+  if (!cur_widget) return false;
+  return cur_widget->ClearDesk(id);
 }
 
 void MainWindow::EndGame(const bool win_or_lose) {
