@@ -25,11 +25,13 @@ void JoinGame(const wstring &password, const wstring &player_name) {
   window->DrawPlayingPage(Winner, player_names, number_of_cards, network_status,
                           controlled_by_bot, NULL);
 
-  for (int i = 0; i < 10; i++) {
-    Card cardss[1] = {
-        Card{Suit(rand() % 4), (unsigned short)(rand() % 15 + 1)}};
-    window->UpdateCards(0, -1, cardss);
-  }
+  // for (int i = 0; i < 10; i++) {
+  //  Card cardss[1] = {
+  //     Card{Suit(rand() % 4), (unsigned short)(rand() % 15 + 1)}};
+  // window->UpdateCards(0, -1, cardss);
+  //}
+  Card cardss[3] = {{Spade, 8}, {Spade, 12}, {Spade, 1}};
+  window->UpdateCards(0, -3, cardss, true);
 }
 
 wchar_t c[2] = L"0";

@@ -171,7 +171,7 @@ class DeskWidget : public QWidget {
 
  public:
   explicit DeskWidget(QWidget *parent, const bool direction,
-                      const GameType type, const unsigned short number_of_cards,
+                      const GameType type, const short number_of_cards,
                       const Card cards[] = NULL);
 
  private:

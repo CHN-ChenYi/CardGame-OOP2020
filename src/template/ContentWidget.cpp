@@ -451,14 +451,14 @@ void DeckWidget::UpdateCards(const short delta, const Card cards[],
     }
   } else {
     const short delta_true = delta * -1;
-    if (cards) {
-      for (int i = 0; i < delta_true; i++)
-        card_multiset_->insert(
-            new CardLabel(cards_widget_, cards[i], direction_, selectable_));
-    } else {
+    if (is_not_south) {
       for (int i = 0; i < delta_true; i++)
         card_multiset_->insert(new CardLabel(cards_widget_, Card{Club, 16},
                                              direction_, selectable_));
+    } else {
+      for (int i = 0; i < delta_true; i++)
+        card_multiset_->insert(
+            new CardLabel(cards_widget_, cards[i], direction_, selectable_));
     }
   }
   QCoreApplication::postEvent(this, new QResizeEvent(size(), size()));
@@ -513,8 +513,8 @@ void DeckWidget::resizeEvent(QResizeEvent *) {
 }
 
 DeskWidget::DeskWidget(QWidget *parent, const bool direction,
-                       const GameType type,
-                       const unsigned short number_of_cards, const Card cards[])
+                       const GameType type, const short number_of_cards,
+                       const Card cards[])
     : QWidget(parent), direction_(direction) {
   setAttribute(Qt::WA_DeleteOnClose);
   if (number_of_cards <= 0) {
@@ -523,7 +523,7 @@ DeskWidget::DeskWidget(QWidget *parent, const bool direction,
       text_label_->setText("已跳过");
     } else {
       std::wostringstream new_text;
-      new_text << "已摸" << -number_of_cards << "张牌";
+      new_text << L"已摸" << -number_of_cards << L"张牌";
       text_label_->setText(QString::fromStdWString(new_text.str()));
     }
     text_label_->setAlignment(Qt::AlignCenter);
