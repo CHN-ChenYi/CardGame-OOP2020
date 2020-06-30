@@ -12,9 +12,9 @@ const int max_hist_size = 450;
 
 wstring current_room = L"123";
 GameType current_type = Winner;
-wstring current_name = L"Untitled";
+wstring current_name = L"";
 unsigned short num_of_player = 1;
-wstring player_names[4] = {L"Untitled1", L"Untitled2", L"Untitled3", L"Untitled4"};
+wstring player_names[4] = {L"", L"", L"", L""};
 unsigned short number_of_cards[4];
 short route[4] = {-1, -1, -1, -1};
 card_list current_card[4];
@@ -480,7 +480,7 @@ void StartGame() {
   double tmp_network_status[4];
   bool tmp_controlled_by_bot[4];
   for(int i=0;i<num_of_player;i++) tmp_player_names[i] = player_names[i], tmp_network_status[i] = network_status[i], tmp_controlled_by_bot[i] = controlled_by_bot[i];
-  for(int i=0;i<4;i++) player_names[i] = L"Untitled", network_status[i] = 0, tmp_controlled_by_bot[i] = 0;
+  for(int i=0;i<4;i++) player_names[i] = L"", network_status[i] = 0, tmp_controlled_by_bot[i] = 0;
   for(int i=0;i<num_of_player;i++) player_names[tr(i)] = tmp_player_names[i], network_status[tr(i)] = tmp_network_status[i], controlled_by_bot[tr(i)] = tmp_controlled_by_bot[i];
   deal_cards();
   for(int i = 0; i < num_of_player; i++)
@@ -772,9 +772,9 @@ void Home() {
   window->EndNetworkEventLoop();
   window->DrawHomePage();
   current_room = L"123";
-  current_name = L"Untitled";
+  current_name = L"";
   num_of_player = 1;
-  for(int i=0;i<4;i++)player_names[i]=L"Untitled"+to_wstring(i),current_card[i].size = tochange[i].size = 0;
+  for(int i=0;i<4;i++)player_names[i]=L"",current_card[i].size = tochange[i].size = 0;
   memset(route,-1,sizeof(route));
   memset(controlled_by_bot,0,sizeof(controlled_by_bot));
   memset(network_status,0,sizeof(network_status));
