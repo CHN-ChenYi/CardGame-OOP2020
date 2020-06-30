@@ -1,0 +1,2 @@
+D:\ZJU\2_spring_summer\oop\Cards\oop2020\src\template\debug\template.exe
+D:\ZJU\2_spring_summer\oop\Cards\oop2020\src\template\debug\template.pdb
