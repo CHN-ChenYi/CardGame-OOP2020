@@ -1,4 +1,4 @@
-﻿#include "ContentWidget.h"
+#include "ContentWidget.h"
 
 #include <QComboBox>
 #include <QCoreApplication>
@@ -582,6 +582,8 @@ PlayWidget::PlayWidget(MainWindow *parent, const GameType type,
     deck[i] = new DeckWidget(this, i < 2, !i, type, player_name[i],
                              number_of_cards[i], network_status[i],
                              controlled_by_bot[i], i ? NULL : cards);
+
+  for (int i = 0; i < 4; i++) qDebug() << player_name[i];
 
   main_layout_ = new QHBoxLayout(this);
   main_layout_->setMargin(2);
