@@ -480,6 +480,7 @@ const Card *DeckWidget::GetChoosenCard(const unsigned short num) const {
 }
 
 void DeckWidget::resizeEvent(QResizeEvent *) {
+  if (!exist_) return;
   const int height = cards_widget_->height();
   const int width = cards_widget_->width();
   if (direction_) {
@@ -608,11 +609,9 @@ PlayWidget::PlayWidget(MainWindow *parent, const GameType type,
     score_text->setAlignment(Qt::AlignCenter);
     score_layout->addWidget(score_text, 1, 1);
     for (int i = 0; i < 4; i++) {
-      if (player_name[i][0] != '\0') {
-        score_label[i] = new QLabel("0", this);
-        score_label[i]->setAlignment(Qt::AlignCenter);
-        score_layout->addWidget(score_label[i], pos_x[i], pos_y[i]);
-      }
+      score_label[i] = new QLabel(player_name[i][0] != '\0' ? "0" : "", this);
+      score_label[i]->setAlignment(Qt::AlignCenter);
+      score_layout->addWidget(score_label[i], pos_x[i], pos_y[i]);
     }
     for (int i = 0; i < 3; i++) {
       score_layout->setRowStretch(i, 1);
