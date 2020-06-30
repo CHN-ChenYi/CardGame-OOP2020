@@ -143,6 +143,14 @@ void InitOrJoinWidget::SetInfo(const wstring &info) {
 }
 
 void InitOrJoinWidget::Accept() {
+  if (!first_input_->text().length()) {
+    SetInfo(L"服务器密码不能为空");
+    return;
+  }
+  if (!second_input_->text().length()) {
+    SetInfo(L"玩家昵称不能为空");
+    return;
+  }
   if (widget_type_) {
     ::JoinGame(first_input_->text().toStdWString(),
                second_input_->text().toStdWString());
