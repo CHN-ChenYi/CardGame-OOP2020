@@ -2,7 +2,6 @@
 #include "..\include\Worker.h"
 
 MeyaS::Worker::Worker(DataStream *p) : maxWaitTime(3000), peer(p),alive(true) {
-
 }
 
 MeyaS::DataStream *MeyaS::Worker::getPeer() {

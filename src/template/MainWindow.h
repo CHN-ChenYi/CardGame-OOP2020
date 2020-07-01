@@ -51,6 +51,7 @@ public:
     card_list(){size = 0; cards = (Card*)malloc(sizeof(Card) * 27); }
     ~card_list(){delete[] cards;}
     void ins(Card u){if(size<27)cards[size++]=u;}
+    void DeleteCard(unsigned short pos){for(int j=pos;j<size-1;j++)cards[j]=cards[j+1]; size--;}
     card_list & operator = (card_list& u)
     {
         size = u.size;

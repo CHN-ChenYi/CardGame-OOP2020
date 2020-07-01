@@ -2,6 +2,7 @@
 #include <io.h>
 #include <QDebug>
 #include <queue>
+#include "src/AI/AI.h"
 #include "parse.h"
 #include "src/network/include/Client.h"
 #include "src/network/include/MeyaS.h"
@@ -34,6 +35,7 @@ bool ischanged = 0;
 short round = 0;
 bool istypeknown = 0;
 card_list tochange[4];
+bool first_time_connect = 1;
 extern MainWindow *window;
 
 unsigned short card_value(Card u)
@@ -74,6 +76,7 @@ void ServerEventProcess()
     if(current_stage == 0) return;
     if(current_stage == 1)
     {
+        if(!soc.isFullyConnected())soc.accept();
         auto peers = soc.getPeers();
         for(int i = (int)peers.size() - 1; i >= 0; i--)
         {
@@ -88,9 +91,10 @@ void ServerEventProcess()
           }
           else
           {
-             auto p = peers.at(0)->getPeer()->getLineW();
+             auto p = stream->getLineW();
              wstring player_name = L"", password = L"";
              connect_join_parse(p, player_name, password);
+             qDebug()<<p;
              if(num_of_player < 4 && password == current_room)
              {
                  bool flag = true;
@@ -107,7 +111,13 @@ void ServerEventProcess()
                      qDebug() << player_name << L" " << password << L" " << route[num_of_player - 1];
                  }
              }
-
+             else if(player_name != L"")
+             {
+                 isreplied[i] = true;
+                 qDebug()<<"wrong password or num_of_player exceeded";
+                 if(password != current_room) peers.at(i)->getPeer()->sendLineW(L"-wrong_password");
+                 else if(num_of_player >= 4) peers.at(i)->getPeer()->sendLineW(L"-player_exceeded");
+             }
           }
         }
     }
@@ -146,7 +156,6 @@ void ServerEventProcess()
             {
                 ischanged = 1;
                 for(int i=0;i<num_of_player;i++)for(int j=0;j<3;j++)current_card[tr(i)].ins(tochange[i].cards[j]);
-                Card tmp[3];
                 window->UpdateCards(0, -3, tochange[0].cards, true);
                 for(int i=0;i<num_of_player;i++)
                 {
@@ -278,10 +287,26 @@ void ClientEventProcess()
         wstring tmp = L"-connect_join " + current_name + L" " + current_room + L"$";
         auto stream = client.getPeer();
         stream->sendLineW(tmp);
-        qDebug () << tmp << endl;
+        qDebug () << "connect"<< tmp << endl;
         current_type = (s[9]==L'H') ? Hearts : Winner;
         if(!istypeknown)  window->DrawWaitingPage(current_type, false);
         istypeknown = 1;
+        return;
+    }
+    if(s.length() >= 15 && s.substr(0,15) == L"-wrong_password")
+    {
+        window->DrawJoinPage();
+        window->SetInfo(L"密码错误");
+        istypeknown = 0;
+        window->EndNetworkEventLoop();
+        return;
+    }
+    if(s.length() >= 16 && s.substr(0,16) == L"-player_exceeded")
+    {
+        window->DrawJoinPage();
+        window->SetInfo(L"玩家个数超过上限");
+        istypeknown = 0;
+        window->EndNetworkEventLoop();
         return;
     }
     if(s.length() >= 14 && s.substr(0,14) == L"-check_network")
@@ -378,7 +403,7 @@ void NewGame(const wstring &password, const wstring &player_name,
   player_names[0] = current_name;
   network_status[0] = 1.0;
   controlled_by_bot[0] = false;
-  soc.startListening(1);
+  soc.startListening(3);
   window->StartNetworkEventLoop(1500);
 }
 
@@ -387,9 +412,14 @@ void JoinGame(const wstring &password, const wstring &player_name) {
   current_room = password;
   current_name = player_name;
   isServer = false;
-  auto serverList = client.probeServer();
-  while (serverList.empty()) serverList = client.probeServer();
-  client.connectTo(MeyaS::Address::createAddress(serverList.at(0), DEFAULT_PORT));
+  if(first_time_connect)
+  {
+      first_time_connect = 0;
+      auto serverList = client.probeServer();
+      while (serverList.empty()) serverList = client.probeServer();
+      client.connectTo(MeyaS::Address::createAddress(serverList.at(0), DEFAULT_PORT));
+      client.getPeer()->setWaitTime(1);
+  }
   window->StartNetworkEventLoop(1500);
 }
 
@@ -472,8 +502,19 @@ void deal_cards()
     }
 }
 
+void AIChange(unsigned short i)
+{
+    unsigned short *tmp = Exchange_Hearts(current_card[tr(i)]);
+    sort(tmp,tmp+3);
+    for(int j=2;j>=0;j--)
+    {
+        tochange[(1+i+round)%num_of_player].ins(current_card[tr(i)].cards[tmp[j]]);
+        current_card[tr(i)].DeleteCard(j);
+    }
+}
 void StartGame() {
   qDebug() << "StartGame";
+  soc.stopListening();
   final_winner = -1;
   window->EndNetworkEventLoop();
   wstring tmp_player_names[4];
@@ -528,9 +569,9 @@ void StartGame() {
           ischanged = 0;
           for(int i=1;i<num_of_player;i++)
           {
-              if(controlled_by_bot[tr(i)])
+              if(controlled_by_bot[tr(i)]) //aichange
               {
-                  //aichange
+                  AIChange(i);
               }
           }
       }
@@ -568,6 +609,7 @@ void StartGame() {
 
 void letplay(const unsigned short id)
 {
+    qDebug()<<"letplay"<<id;
     if(id == 0)
     {
         canplay = 1;
@@ -576,7 +618,28 @@ void letplay(const unsigned short id)
     if(controlled_by_bot[tr(id)] || route[id] == -1)
     {
         //get ai play
+        card_list cur;
+        unsigned short* tmp;
+        if(current_type == Winner) tmp = Play_Winners(current_card[tr(id)], hist_card, hist_size, cur.size);
+        else tmp = Play_Hearts(current_card[tr(id)], hist_card, hist_size), cur.size = 1;
+        for(int i=0;i<cur.size;i++) cur.cards[i] = current_card[tr(id)].cards[tmp[i]];
+        sort(tmp,tmp+cur.size);
+        for(int i=cur.size-1;i>=0;i--) current_card[tr(id)].DeleteCard(tmp[i]);
+        hist_card[hist_size++]=cur;
+        window->UpdateCards(tr(id), cur.size, cur.cards, true);
+        for(int i=1;i<num_of_player;i++)
+        {
+            if(i!=id && route[i]!=-1)
+            {
+                wstring s=L"-info "+player_names[tr(id)]+L" "+cur.towstring();
+                qDebug()<<s;
+                auto peers = soc.getPeers();
+                auto stream = peers.at(route[i])->getPeer();
+                stream->sendLineW(s);
+            }
+        }
         calc_statistics();
+        if(final_winner == -1)letplay((id+1)%num_of_player);
     }
     else
     {
@@ -725,14 +788,7 @@ void PlayAgain()
             {
                 if(controlled_by_bot[tr(i)])
                 {
-                    //aichange
-                }
-                else if(route[i]!=-1)
-                {
-                    wstring s = L"-change_out";
-                    auto peers = soc.getPeers();
-                    auto stream = peers.at(route[i])->getPeer();
-                    stream->sendLineW(s);
+                    AIChange(i);
                 }
             }
         }
@@ -769,7 +825,7 @@ void PlayAgain()
 }
 void Home() {
   qDebug() << "home";
-  window->EndNetworkEventLoop();
+  //window->EndNetworkEventLoop();
   window->DrawHomePage();
   current_room = L"123";
   current_name = L"";
@@ -780,7 +836,7 @@ void Home() {
   memset(network_status,0,sizeof(network_status));
   memset(points,0,sizeof(points));
   isServer = false;
-  current_stage = 1;
+  current_stage = 0;
   for(int i=0;i<10;i++)isreplied[i] = 1;
   for(int i=0;i<hist_size;i++)hist_card[i].size = 0;
   hist_size = 0;

@@ -7,6 +7,7 @@ QT += \
     gui
 
 SOURCES += \
+    src/AI/AI.cpp \
     src/network/src/Address.cpp \
     src/network/src/Broadcaster.cpp \
     src/network/src/Client.cpp \
@@ -28,6 +29,7 @@ SOURCES += \
     src/controller/parse.cpp
 
 HEADERS += \
+    src/AI/AI.h \
     src/network/include/Address.h \
     src/network/include/Broadcaster.h \
     src/network/include/Client.h \
