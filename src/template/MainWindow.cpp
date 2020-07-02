@@ -1,6 +1,7 @@
 ﻿#include "MainWindow.h"
 
 #include <QDebug>
+#include <QTextEdit>
 #include <QtWidgets>
 
 #include "ContentWidget.h"
@@ -49,9 +50,8 @@ MainWindow::MainWindow() : timer_(NULL) {
   // QString message = tr("Status tip");
   // statusBar()->showMessage(message);
 
-  setWindowTitle("Title");
+  setWindowTitle("OOP2020 Card Game");
   setMinimumSize(480, 320);
-  resize(480, 320);
 }
 
 void MainWindow::Home() { ::Home(); }
@@ -62,10 +62,13 @@ void MainWindow::Exit() {
 }
 
 void MainWindow::About() {
-  QMessageBox::about(this, "About", "一个面向对象课程中完成的纸牌游戏");
+  QMessageBox::about(this, "About", "一个在面向对象课程中完成的纸牌游戏");
 }
 
-void MainWindow::Manual() { QMessageBox::about(this, "Manual", "TODO"); }
+void MainWindow::Manual() {
+  ManualWindow *manual_window = new ManualWindow();
+  manual_window->show();
+}
 
 void MainWindow::StartNetworkEventLoop(int interval) {
   if (timer_) delete timer_;
@@ -176,4 +179,56 @@ void MainWindow::EndGame(const bool win_or_lose) {
   PlayWidget *cur_widget = dynamic_cast<PlayWidget *>(content_);
   if (!cur_widget) return;
   return cur_widget->EndGame(win_or_lose);
+}
+
+ManualWindow::ManualWindow() {
+  setWindowTitle("Manual");
+  setMinimumSize(480, 320);
+  text_ = new QTextEdit(this);
+  text_->setReadOnly(true);
+  text_->setMarkdown(
+      R"(# 游戏操作
+
+在同一局域网中，一人新建游戏后其他人加入即可
+
+# 游戏规则
+
+## 争上游
+
+* 2/3个人 每人22/18张（2个人的时候，留10张作为底牌，故每人22张）
+
+* 牌型
+
+  * 单张、对子、三张、炸弹（4张相同的）、王炸、三带二、顺子（>=5张）、连对（>=3个）、三顺（>=2个）、四带二（四个一样的带两张任意的牌）、飞机（三顺+相同个数的对子，对子不要求一定相邻但不能重复，如3334445566, 3334445556699KK），**三带一不支持**
+
+  * 单张牌点数比较为大王>小王>2>A>K>Q>J>10>...>3
+
+  * 所有的顺子、双顺、三顺、连对等牌型都必须按照上述规则，如334455, 34567, QQQKKKAAA等，必须从>=3的数开始，到<=A的数结束，2不可以参与所有的这类牌型，如以下牌型是不合法的：23456, AA2233
+
+* 大小比较：10,J,Q,K,A > 9,10,J,Q,K > 8,9,10,J,Q > ... > 3,4,5,6,7 其他类推
+
+  * 三带二、四带二、飞机这种“大带小”的牌型，按“大”的点数大小比，如99944>88855，如果一样则后者不能大过前者，如99944（先出）不可被99955（后出）压过
+
+  * 王炸>四张炸>普通牌           四带二不算炸弹，算普通牌型
+
+  * 当前玩家是本轮第一个出牌的玩家，可以任意出，否则，所出的牌必须大过上一个出牌的人才可以出牌
+
+## 红心大战
+
+* 4个人 每人13张 去掉大小王 
+
+* 第一次向下家传，第二次向上家传，第三次向对家传，最后一次不传
+
+* 传完之后，持有草花2的人先出牌，且必须出草花2
+
+* 黑桃Q是13分，所有红桃牌都是1分，分数最小的胜
+
+* 点数排名A>K>Q>...>3>2
+
+* 当前玩家是本轮第一个出牌的玩家，可以任意出（除了第一轮必须出草花2），否则，若手中有和第一个出牌的人所出的牌同样的花色的牌，则必须出一张同花色的牌，否则可以任意出
+)");
+}
+
+void ManualWindow::resizeEvent(QResizeEvent *) {
+  text_->setGeometry(0, 0, geometry().width(), geometry().height());
 }

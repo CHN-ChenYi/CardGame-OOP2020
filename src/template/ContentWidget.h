@@ -53,13 +53,11 @@ class HomeWidget : public ContentWidget {
     qDebug() << "Can't find HomeWidget::SetInfo";
   }
 
- protected:
-  void resizeEvent(QResizeEvent *event) override;
-
  private:
   QVBoxLayout *vlayout_;
   QPixmap *bg_image_;
   void SetBackgroundImage();
+  void resizeEvent(QResizeEvent *event) override;
 };
 
 class InitOrJoinWidget : public ContentWidget {

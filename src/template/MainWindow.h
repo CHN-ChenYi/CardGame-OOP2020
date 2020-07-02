@@ -1,5 +1,9 @@
 ﻿#pragma once
 
+#ifndef _DEBUG
+#define QT_NO_DEBUG_OUTPUT
+#endif
+
 #include <QMainWindow>
 #include <string>
 
@@ -9,6 +13,7 @@ class ContentWidget;
 
 QT_BEGIN_NAMESPACE
 class QPushButton;
+class QTextEdit;
 QT_END_NAMESPACE
 
 enum GameType {
@@ -95,4 +100,15 @@ class MainWindow : public QMainWindow {
  public slots:
   void NewGame();
   void JoinGame();
+};
+
+class ManualWindow : public QMainWindow {
+  Q_OBJECT
+
+ public:
+  ManualWindow();
+
+ private:
+  QTextEdit *text_;
+  void resizeEvent(QResizeEvent *event) override;
 };
