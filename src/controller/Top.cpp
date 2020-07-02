@@ -31,6 +31,7 @@ unsigned short hist_size = 0;
 unsigned short first_player = 0; // for Hearts
 bool canplay = 0;
 int final_winner = -1;
+unsigned short now_player = 0;
 bool ischanged = 0;
 short round = 0;
 bool istypeknown = 0;
@@ -73,6 +74,7 @@ static auto client = MeyaS::Client();
 
 void ServerEventProcess()
 {
+    static int cnt = 0;
     if(current_stage == 0) return;
     if(current_stage == 1)
     {
@@ -123,6 +125,7 @@ void ServerEventProcess()
     }
     else if(current_stage == 2)
     {
+        cnt++;
         if(final_winner != -1)
         {
             qDebug()<<"finalwinner"<<final_winner;
@@ -270,10 +273,31 @@ void ServerEventProcess()
         {
             if(route[i]!=-1)
             {
-                if(network_status[tr(i)]<0.03) controlled_by_bot[tr(i)] = 1;
+                if(network_status[tr(i)]<0.03)
+                {
+                    if(!controlled_by_bot[tr(i)])
+                    {
+                        controlled_by_bot[tr(i)] = 1;
+                        if(now_player == i) letplay(i);
+                    }
+                }
                 window->UpdatePlayer(tr(i), network_status[tr(i)], controlled_by_bot[tr(i)]);
             }
         }
+        /*if(cnt % 10 == 0)
+        for(int i=1;i<num_of_player;i++)
+        {
+            if(route[i]==-1||controlled_by_bot[tr(i)]==true||network_status[tr(i)]<0.7)continue;
+            auto peers = soc.getPeers();
+            auto stream = peers.at(route[i])->getPeer();
+            wstring s = L"-upd_status";
+            for(int j = 0 ; j < 4; j++)
+            {
+                s = s + L" " + to_wstring(network_status[tr(j)]) + L" " + to_wstring((int)controlled_by_bot[tr(j)]);
+            }
+            qDebug() << s << endl;
+            if(!stream->sendLineW(s))continue;
+        }*/
     }
 }
 
@@ -388,6 +412,12 @@ void ClientEventProcess()
         change_in_parse(s, tmp);
         for(int i=0;i<3;i++)current_card[0].ins(tmp.cards[i]);
         window->UpdateCards(0, -3, tmp.cards, false);
+        return;
+    }
+    if(s.length() >= 11 && s.substr(0,11) == L"-upd_status")
+    {
+        upd_status_parse(s, network_status, controlled_by_bot);
+        for(int i=0;i<num_of_player;i++)window->UpdatePlayer(tr(i), network_status[tr(i)], controlled_by_bot[tr(i)]);
         return;
     }
 }
@@ -611,6 +641,7 @@ void StartGame() {
 
 void letplay(const unsigned short id)
 {
+    now_player = id;
     if(final_winner != -1) return;
     //static int cnt = 0;
     qDebug()<<"letplay"<<id;
@@ -913,7 +944,7 @@ unsigned short winner_checktype(const Card cards[], const unsigned short size, p
         if(cnt[(i==14)?1:i]!=1) j=0; else j++;
         if(j>=5&&j==size)
         {
-            feat_value = make_pair(i-j+1, (i==14)?1:i);
+            feat_value = make_pair(i-j+1, i);
             return 5; //顺子
         }
     }
@@ -922,7 +953,7 @@ unsigned short winner_checktype(const Card cards[], const unsigned short size, p
         if(cnt[(i==14)?1:i]!=2) j=0; else j++;
         if(j>=3&&j*2==size)
         {
-            feat_value = make_pair(i-j+1, (i==14)?1:i);
+            feat_value = make_pair(i-j+1, i);
             return 6; //连对
         }
     }
@@ -931,7 +962,7 @@ unsigned short winner_checktype(const Card cards[], const unsigned short size, p
         if(cnt[(i==14)?1:i]!=3) j=0; else j++;
         if(j>=2&&j*3==size)
         {
-            feat_value = make_pair(i-j+1, (i==14)?1:i);
+            feat_value = make_pair(i-j+1, i);
             return 7; //三连对
         }
     }
@@ -965,15 +996,16 @@ unsigned short winner_checktype(const Card cards[], const unsigned short size, p
     }
     bool flag = 1;
     unsigned short st = 0, ed = 13;
-    for(int i=1;i<=13;i++)
+    if(cnt[2]!=0)return 0;
+    for(int i=3;i<=14;i++)
     {
-        if(cnt[i]!=2&&cnt[i]!=3&&cnt[i]!=0) flag=0;
-        if(cnt[i]==3)
+        if(cnt[(i==14)?1:i]!=2&&cnt[(i==14)?1:i]!=3&&cnt[(i==14)?1:i]!=0) flag=0;
+        if(cnt[(i==14)?1:i]==3)
         {
             st = i;
-            for(ed=i;ed<=13;ed++)if(cnt[ed]!=3)break;
+            for(ed=i;ed<=14;ed++)if(cnt[(ed==14)?1:ed]!=3)break;
             ed--;
-            for(int j=ed+1;j<=13;j++)if(cnt[j]==3)flag=0;
+            for(int j=ed+1;j<=14;j++)if(cnt[(j==14)?1:j]==3)flag=0;
             break;
         }
     }
