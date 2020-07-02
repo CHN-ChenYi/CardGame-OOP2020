@@ -416,6 +416,7 @@ DeckWidget::DeckWidget(QWidget *parent, const bool direction,
 }
 
 DeckWidget::~DeckWidget() {
+  if (!exist_) return;
   delete hlayout_;
   delete vlayout_;
   delete main_layout_;
