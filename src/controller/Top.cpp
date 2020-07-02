@@ -332,13 +332,14 @@ void ClientEventProcess()
     if(s.length() >= 6 && s.substr(0,6) == L"-start")
     {
         window->DrawPlayingPage(current_type, player_names, number_of_cards, network_status, controlled_by_bot, current_card[0].cards);
-        if(current_type==Hearts&&(round+1)%num_of_player!=0) ischanged = 0, canplay = 1;
+        if(current_type==Hearts&&(round+1)%num_of_player!=0) ischanged = 0, canplay = 1, window->SetInfo(L"请选择3张牌");
         else ischanged = 1, canplay = 0;
         return;
     }
     if(s.length() >= 5 && s.substr(0,5) == L"-play")
     {
         canplay = 1;
+        window->SetInfo(L"轮到你出牌");
         return;
     }
     if(s.length() >= 5 && s.substr(0,5) == L"-info")
@@ -376,7 +377,7 @@ void ClientEventProcess()
     {
         qDebug()<<"-replay";
         for(int i=0;i<num_of_player;i++)window->UpdateCards(tr(i), -current_card[tr(i)].size, current_card[tr(i)].cards, false);
-        if(current_type==Hearts&&(round+1)%num_of_player!=0) ischanged = 0, canplay = 1;
+        if(current_type==Hearts&&(round+1)%num_of_player!=0) ischanged = 0, canplay = 1, window->SetInfo(L"请选择3张牌");
         else ischanged = 1, canplay = 0;
         return;
     }
@@ -574,6 +575,7 @@ void StartGame() {
                   AIChange(i);
               }
           }
+          window->SetInfo(L"请选择3张牌");
       }
       else
       {
@@ -609,11 +611,13 @@ void StartGame() {
 
 void letplay(const unsigned short id)
 {
+    if(final_winner == -1) return;
     //static int cnt = 0;
     qDebug()<<"letplay"<<id;
     if(id == 0)
     {
         canplay = 1;
+        window->SetInfo(L"轮到你出牌");
         return;
     }
     if(controlled_by_bot[tr(id)] || route[id] == -1)
