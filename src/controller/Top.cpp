@@ -611,7 +611,7 @@ void StartGame() {
 
 void letplay(const unsigned short id)
 {
-    if(final_winner == -1) return;
+    if(final_winner != -1) return;
     //static int cnt = 0;
     qDebug()<<"letplay"<<id;
     if(id == 0)
