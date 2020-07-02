@@ -1,30 +1,28 @@
 #include "..\include\Timer.h"
 #include "..\include\Worker.h"
 
-MeyaS::Worker::Worker(DataStream *p) : maxWaitTime(3000), peer(p),alive(true) {
-
+MeyaS::Worker::Worker(DataStream *p) : maxWaitTime(3000), peer(p), alive(true) {
 }
 
 MeyaS::DataStream *MeyaS::Worker::getPeer() {
     return peer;
 }
 
-bool MeyaS::Worker::checkStatus() {
-    peer->sendLineW(L"#heart");
+std::wstring MeyaS::Worker::checkStatus() {
+    auto ret = peer->sendLineW(L"#heart");
+    if (ret != 0) {
+        alive = false;
+        return L"";
+    }
     MeyaS::Timer t;
     t.start(maxWaitTime);
-    while (!t.timeUp()) {
+    do {
         auto s = peer->getLineW();
         if (s.empty()) continue;
-        if(s == L"#beat"){
-            return true;
-        }else{
-            alive = false;
-            return false;
-        }
-    }
+        return s;
+    } while (!t.timeUp());
     alive = false;
-    return false;
+    return L"";
 }
 
 void MeyaS::Worker::shutdown() {

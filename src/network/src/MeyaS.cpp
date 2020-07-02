@@ -10,3 +10,8 @@ bool MeyaS::initialize(WORD version) {
     }
     return true;
 }
+
+bool MeyaS::cleanUp() {
+    WSACleanup();
+    return true;
+}

@@ -35,6 +35,8 @@ struct Card {
   bool operator == (Card &u){return suit==u.suit&&rank==u.rank;}
   bool operator == (const Card &u){return suit==u.suit&&rank==u.rank;}
   Card(Suit suit = Club, unsigned short rank = 16) {this->suit = suit; this->rank = rank;}
+  Card(const Card& u){this->suit = u.suit; this->rank = u.rank;}
+  Card & operator = (const Card & u) {this->suit = u.suit; this->rank = u.rank; return *this;}
   wstring towstring() const
   {
       wstring ret = L"[";
@@ -54,8 +56,10 @@ public:
     unsigned short size;
     Card* cards;
     card_list(){size = 0; cards = (Card*)malloc(sizeof(Card) * 27); }
+    card_list(const card_list &u){size = u.size; cards = (Card*)malloc(sizeof(Card) * 27); for(int i=0;i<size;i++)cards[i]=u.cards[i];}
     ~card_list(){delete[] cards;}
     void ins(Card u){if(size<27)cards[size++]=u;}
+    void DeleteCard(unsigned short pos){for(int j=pos;j<size-1;j++)cards[j]=cards[j+1]; size--;}
     card_list & operator = (card_list& u)
     {
         size = u.size;

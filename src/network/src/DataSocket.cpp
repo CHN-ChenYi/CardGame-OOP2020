@@ -2,16 +2,18 @@
 #include "..\include\DataSocket.h"
 
 MeyaS::DataPack *MeyaS::DataSocket::recv(uint maxLength) {
-    char *recvbuf = new char[maxLength];
+    char *recvbuf = new char[maxLength + 2];
+    recvbuf[maxLength] = 0;
+    recvbuf[maxLength + 1] = 0;
     int iResult;
     iResult = ::recv(sockfd, recvbuf, maxLength, 0);
     if (iResult == SOCKET_ERROR) {
         auto err = WSAGetLastError();
-        if (err != WSAEWOULDBLOCK) {
+        if (err != WSAEWOULDBLOCK && err != WSAETIMEDOUT) {
+            //Notice here, if client socket is blocking and has a recv timeout, it may returns WSAETIMEDOUT
             std::cerr << "recv failed: " << WSAGetLastError() << std::endl;
             closesocket(sockfd);
             sockfd = INVALID_SOCKET;
-            WSACleanup();
             DebugException("Recv failed");
         }
         delete[] recvbuf;
@@ -22,7 +24,7 @@ MeyaS::DataPack *MeyaS::DataSocket::recv(uint maxLength) {
     return ret;
 }
 
-bool MeyaS::DataSocket::send(const DataPack &dataPack) {
+int MeyaS::DataSocket::send(const DataPack &dataPack) {
     int iResult = ::send(sockfd, reinterpret_cast<const char *>(dataPack.data), dataPack.length, 0);
     if (iResult == SOCKET_ERROR) {
         auto err = WSAGetLastError();
@@ -30,13 +32,13 @@ bool MeyaS::DataSocket::send(const DataPack &dataPack) {
             std::cerr << "Send failed: " << WSAGetLastError() << std::endl;
             closesocket(sockfd);
             sockfd = INVALID_SOCKET;
-            WSACleanup();
             DebugException("Send failed");
+            return err;
         }
-        return false;
+        return 0;
     }
     std::clog << iResult << " bytes of data sent." << std::endl;
-    return true;
+    return 0;
 }
 
 //MeyaS::DataPack::DataPack() : data(nullptr), length(0), type(0) {}
@@ -58,7 +60,7 @@ MeyaS::DataPack::DataPack(const std::string &data) {
 }
 
 MeyaS::DataPack::DataPack(const std::wstring &data) {
-    length = (data.length() + 1)*sizeof(data[0]);
+    length = (data.length() + 1) * sizeof(data[0]);
     this->data = new byte[length];
     memcpy((void *) this->data, data.c_str(), length);
 }

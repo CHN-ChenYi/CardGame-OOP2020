@@ -13,7 +13,6 @@ MeyaS::Broadcaster::Broadcaster() {
     int iResult = getaddrinfo(nullptr, DEFAULT_SERVER_PROBE_PORT, &hints, &result);
     if (iResult != 0) {
         std::cerr << "Getaddrinfo failed: " << iResult << std::endl;
-        WSACleanup();
         DebugException("Getaddrinfo failed");
     }
     initialize(result);
@@ -43,7 +42,6 @@ bool MeyaS::Broadcaster::shout(const MeyaS::DataPack &dataPack) {
         if (err != WSAEWOULDBLOCK) {
             std::cerr << "Sendto failed: " << err << std::endl;
             closesocket(sockfd);
-            WSACleanup();
             DebugException("Sendto failed");
         }
         return false;
@@ -85,7 +83,6 @@ std::pair<MeyaS::DataPack *, std::string> MeyaS::Broadcaster::accept() {
         if (err != WSAEWOULDBLOCK) {
             std::cerr << "Accept failed: " << err << std::endl;
             closesocket(sockfd);
-            WSACleanup();
             DebugException("Server accept failed");
         }
         return {};

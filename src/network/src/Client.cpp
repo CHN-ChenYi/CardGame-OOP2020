@@ -32,18 +32,18 @@ MeyaS::DataStream *MeyaS::Client::getPeer() {
     return peer;
 }
 
-MeyaS::Client::Client() : maxWaitTime(50), peer(nullptr),alive(false) {
+MeyaS::Client::Client() : maxWaitTime(1), peer(nullptr),alive(false) {
 }
 
 std::wstring MeyaS::Client::handleMessage() {
     auto message = peer->getLineW();
     if (message.empty()) return L"";
-    if (message[0] == '#') { //command
+    if (message[0] == L'#') { //command
         if (message == L"#shutdown") {
             alive = false;
         }
         if (message == L"#heart") {
-            peer->sendLineW(L"beat");
+            peer->sendLineW(L"#beat");
         }
     }
     return message;

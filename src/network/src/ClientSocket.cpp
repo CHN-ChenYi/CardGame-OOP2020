@@ -1,5 +1,8 @@
+#include "..\include\Timer.h"
 #include "..\include\Exception.h"
 #include "..\include\ClientSocket.h"
+
+#define CONNECT_TIME_OUT 1000
 
 MeyaS::ClientSocket::ClientSocket(Address *serverAddress) : serverAddress(serverAddress) {
     addrinfo *result = nullptr, hints{};
@@ -10,26 +13,37 @@ MeyaS::ClientSocket::ClientSocket(Address *serverAddress) : serverAddress(server
                               &result);
     if (iResult != 0) {
         std::cerr << "Getaddrinfo failed: " << iResult << std::endl;
-        WSACleanup();
         DebugException("Getaddrinfo failed");
     }
-    ((sockaddr_in *)result->ai_addr)->sin_port = 12448;
+    ((sockaddr_in *) result->ai_addr)->sin_port = 12448;
     initialize(result);
-#ifdef NON_BLOCKING_RECEIVING_CLIENT
-    const int ReceiveTimeout = 10;
-    setsockopt(sockfd,SOL_SOCKET,SO_RCVTIMEO,(char*)&ReceiveTimeout, sizeof(int)));
-#endif
-    //setBlocking(false);
+    setBlocking(false);
 }
 
 bool MeyaS::ClientSocket::connect() {
     addrinfo *ptr = addrInfo;
     int iResult = SOCKET_ERROR;
+    MeyaS::Timer t;
     while (ptr != nullptr && iResult == SOCKET_ERROR) {
         iResult = ::connect(sockfd, ptr->ai_addr, (int) ptr->ai_addrlen);
         if (iResult == SOCKET_ERROR) {
             auto err = WSAGetLastError();
-            std::cerr << err << std::endl;
+            if (err != WSAEWOULDBLOCK) {
+                std::cerr << err << std::endl;
+            } else {
+                timeval timeout{};
+                timeout.tv_sec = CONNECT_TIME_OUT;
+                timeout.tv_usec = 0;
+                fd_set target;
+                target.fd_count=1;
+                target.fd_array[0] = sockfd;
+                int res = ::select(0, nullptr, &target, nullptr, &timeout);
+                if(res==0) continue; //Not writable
+                else { // Writable, ok
+                    iResult = 0;
+                    break;
+                }
+            }
         }
         ptr = ptr->ai_next;
     }
@@ -39,7 +53,6 @@ bool MeyaS::ClientSocket::connect() {
         freeaddrinfo(addrInfo);
         sockfd = INVALID_SOCKET;
         addrInfo = nullptr;
-        WSACleanup();
         DebugException("Unable to connect to server");
         return false;
     }

@@ -14,7 +14,7 @@ namespace MeyaS {
         DataStream *getPeer();
 
         //Send a heartbeat to the client to check if connection is alive.
-        bool checkStatus();
+        std::wstring checkStatus();
 
         //Inform the client that the server shall be shutdown.
         void shutdown();
