@@ -521,7 +521,7 @@ void StartGame() {
   double tmp_network_status[4];
   bool tmp_controlled_by_bot[4];
   for(int i=0;i<num_of_player;i++) tmp_player_names[i] = player_names[i], tmp_network_status[i] = network_status[i], tmp_controlled_by_bot[i] = controlled_by_bot[i];
-  for(int i=0;i<4;i++) player_names[i] = L"", network_status[i] = 0, tmp_controlled_by_bot[i] = 0;
+  for(int i=0;i<4;i++) player_names[i] = L"", network_status[i] = 0, controlled_by_bot[i] = 0;
   for(int i=0;i<num_of_player;i++) player_names[tr(i)] = tmp_player_names[i], network_status[tr(i)] = tmp_network_status[i], controlled_by_bot[tr(i)] = tmp_controlled_by_bot[i];
   deal_cards();
   for(int i = 0; i < num_of_player; i++)
@@ -609,6 +609,7 @@ void StartGame() {
 
 void letplay(const unsigned short id)
 {
+    //static int cnt = 0;
     qDebug()<<"letplay"<<id;
     if(id == 0)
     {
@@ -617,6 +618,7 @@ void letplay(const unsigned short id)
     }
     if(controlled_by_bot[tr(id)] || route[id] == -1)
     {
+        //window->EndNetworkEventLoop();
         //get ai play
         card_list cur;
         unsigned short* tmp;
@@ -639,7 +641,11 @@ void letplay(const unsigned short id)
             }
         }
         calc_statistics();
-        if(final_winner == -1)letplay((id+1)%num_of_player);
+        if(final_winner == -1)
+        {
+            window->ClearDesk(tr((id+1)%num_of_player));
+            letplay((id+1)%num_of_player);
+        }
     }
     else
     {
@@ -1093,7 +1099,5 @@ void calc_statistics()
         {
             for(int i=0;i<num_of_player;i++)if(points[tr(i)]<points[tr(now)]) final_winner=i;
         }
-
     }
-
 }

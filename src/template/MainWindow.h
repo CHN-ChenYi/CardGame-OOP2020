@@ -49,6 +49,7 @@ public:
     unsigned short size;
     Card* cards;
     card_list(){size = 0; cards = (Card*)malloc(sizeof(Card) * 27); }
+    card_list(const card_list &u){size = u.size; cards = (Card*)malloc(sizeof(Card) * 27); for(int i=0;i<size;i++)cards[i]=u.cards[i];}
     ~card_list(){delete[] cards;}
     void ins(Card u){if(size<27)cards[size++]=u;}
     void DeleteCard(unsigned short pos){for(int j=pos;j<size-1;j++)cards[j]=cards[j+1]; size--;}
