@@ -15,7 +15,6 @@ void MeyaS::Socket::initialize(addrinfo *info) {
     sockfd = socket(this->addrInfo->ai_family, this->addrInfo->ai_socktype, this->addrInfo->ai_protocol);
     if (sockfd == INVALID_SOCKET) {
         std::cerr << "Initializing socket failed: " << WSAGetLastError() << std::endl;
-        WSACleanup();
         DebugException("Initializing socket failed");
     }
 }

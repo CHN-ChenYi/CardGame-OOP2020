@@ -43,7 +43,7 @@ std::wstring MeyaS::Client::handleMessage() {
             alive = false;
         }
         if (message == L"#heart") {
-            peer->sendLineW(L"beat");
+            peer->sendLineW(L"#beat");
         }
     }
     return message;

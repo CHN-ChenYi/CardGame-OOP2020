@@ -14,7 +14,6 @@ MeyaS::DataPack *MeyaS::DataSocket::recv(uint maxLength) {
             std::cerr << "recv failed: " << WSAGetLastError() << std::endl;
             closesocket(sockfd);
             sockfd = INVALID_SOCKET;
-            WSACleanup();
             DebugException("Recv failed");
         }
         delete[] recvbuf;
@@ -25,7 +24,7 @@ MeyaS::DataPack *MeyaS::DataSocket::recv(uint maxLength) {
     return ret;
 }
 
-bool MeyaS::DataSocket::send(const DataPack &dataPack) {
+int MeyaS::DataSocket::send(const DataPack &dataPack) {
     int iResult = ::send(sockfd, reinterpret_cast<const char *>(dataPack.data), dataPack.length, 0);
     if (iResult == SOCKET_ERROR) {
         auto err = WSAGetLastError();
@@ -33,13 +32,13 @@ bool MeyaS::DataSocket::send(const DataPack &dataPack) {
             std::cerr << "Send failed: " << WSAGetLastError() << std::endl;
             closesocket(sockfd);
             sockfd = INVALID_SOCKET;
-            WSACleanup();
             DebugException("Send failed");
+            return err;
         }
-        return false;
+        return 0;
     }
     std::clog << iResult << " bytes of data sent." << std::endl;
-    return true;
+    return 0;
 }
 
 //MeyaS::DataPack::DataPack() : data(nullptr), length(0), type(0) {}

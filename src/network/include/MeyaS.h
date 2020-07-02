@@ -12,4 +12,7 @@
 namespace MeyaS {
     // Initialize Winsock
     bool initialize(WORD version = MAKEWORD(2, 2));
+
+    // Clean up for winsock
+    bool cleanUp();
 }

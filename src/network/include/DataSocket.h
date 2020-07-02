@@ -20,7 +20,7 @@ namespace MeyaS {
         // Notice that recv shall not block. send may block is the buffer is full.
         MeyaS::DataPack *recv(uint maxLength);
 
-        bool send(const DataPack &dataPack);
+        int send(const DataPack &dataPack);
 
     protected:
         DataSocket() = default;

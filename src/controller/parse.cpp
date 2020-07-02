@@ -178,11 +178,14 @@ void change_out_parse(wstring &raw, card_list &cur)
     if(sv[0] != L"-change_out") return;
     card_list_parse(&sv, 1, cur);
 }
-void upd_status_parse(wstring &raw, double* network_status, bool* controlled_by_bot)
+void upd_status_parse(wstring &raw, const wstring* const player_names, double* network_status, bool* controlled_by_bot)
 {
     vector<wstring> sv;
     ssplit(raw, sv);
-    if(sv.size()<=1) return;
+    if(sv.size()<=2) return;
     if(sv[0] != L"-upd_status") return;
-    for(int i=0;i<4;i++)network_status[i]=stod(sv[i*2+1]), controlled_by_bot[i]=stoul(sv[i*2+2]);
+    for(int i=1;i<sv.size();i+=3)
+    {
+        for(int j=0;j<4;j++)if(player_names[j]==sv[i])network_status[j] = stod(sv[i+1]), controlled_by_bot[j] = stoul(sv[i+2]);
+    }
 }

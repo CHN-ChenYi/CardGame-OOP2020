@@ -194,12 +194,36 @@ void ServerEventProcess()
         }
         for(int i=0;i<num_of_player;i++)
         {
+            qDebug()<<"check"<<i;
+            wstring s;
             if(route[i]!=-1)
             {
-                network_status[tr(i)] *= 0.9;
                 auto peers = soc.getPeers();
+                if(cnt%20==0)
+                {
+                    while(1)
+                    {
+                        s = peers.at(route[i])->checkStatus();
+                        if(s[0] != L'#')break;
+                    }
+                }
+                else s = peers.at(route[i])->getPeer()->getLineW();
+                qDebug()<<"recvd:" << s;
+                if(peers.at(route[i])->isAlive() == 0)
+                {
+                    qDebug()<<"duan"<<i;
+                    route[i] = -1;
+                    if(!controlled_by_bot[tr(i)])
+                    {
+                        controlled_by_bot[tr(i)] = 1;
+                        network_status[tr(i)] = 0;
+                        window->UpdatePlayer(tr(i), network_status[tr(i)], controlled_by_bot[tr(i)]);
+                        if(now_player == i) letplay(i);
+                    }
+                    continue;
+                }
                 auto stream = peers.at(route[i])->getPeer();
-                wstring s = stream->getLineW();
+                network_status[tr(i)] *= 0.9;
                 if(s.length() >= 14 && s.substr(0,14) == L"-check_network")
                 {
                    network_status[tr(i)] = 1.0;
@@ -284,20 +308,20 @@ void ServerEventProcess()
                 window->UpdatePlayer(tr(i), network_status[tr(i)], controlled_by_bot[tr(i)]);
             }
         }
-        /*if(cnt % 10 == 0)
+        if(cnt % 10 == 0)
         for(int i=1;i<num_of_player;i++)
         {
-            if(route[i]==-1||controlled_by_bot[tr(i)]==true||network_status[tr(i)]<0.7)continue;
+            if(route[i]==-1||controlled_by_bot[tr(i)]==true)continue;
             auto peers = soc.getPeers();
             auto stream = peers.at(route[i])->getPeer();
             wstring s = L"-upd_status";
-            for(int j = 0 ; j < 4; j++)
+            for(int j = 0 ; j < num_of_player; j++)
             {
-                s = s + L" " + to_wstring(network_status[tr(j)]) + L" " + to_wstring((int)controlled_by_bot[tr(j)]);
+                s = s + L" " + player_names[tr(j)] + L" " + to_wstring(network_status[tr(j)]) + L" " + to_wstring((int)controlled_by_bot[tr(j)]);
             }
             qDebug() << s << endl;
             if(!stream->sendLineW(s))continue;
-        }*/
+        }
     }
 }
 
@@ -416,7 +440,7 @@ void ClientEventProcess()
     }
     if(s.length() >= 11 && s.substr(0,11) == L"-upd_status")
     {
-        upd_status_parse(s, network_status, controlled_by_bot);
+        upd_status_parse(s, player_names, network_status, controlled_by_bot);
         for(int i=0;i<num_of_player;i++)window->UpdatePlayer(tr(i), network_status[tr(i)], controlled_by_bot[tr(i)]);
         return;
     }
