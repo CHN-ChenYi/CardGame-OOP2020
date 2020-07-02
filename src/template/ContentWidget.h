@@ -170,13 +170,12 @@ class DeskWidget : public QWidget {
   Q_OBJECT
 
  public:
-  explicit DeskWidget(QWidget *parent, const bool direction,
-                      const GameType type, const short number_of_cards,
-                      const Card cards[] = NULL);
+  explicit DeskWidget(QWidget *parent, const bool overlap, const GameType type,
+                      const short number_of_cards, const Card cards[] = NULL);
 
  private:
   void resizeEvent(QResizeEvent *) override;
-  bool direction_;
+  bool overlap_;
   QLabel *text_label_;
   multiset<PCardLabel, bool (*)(const PCardLabel &, const PCardLabel &)>
       *card_multiset_;

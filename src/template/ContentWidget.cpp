@@ -504,7 +504,7 @@ void DeckWidget::resizeEvent(QResizeEvent *) {
         card_label.value->SetMaxY(max_y);
       }
       card_label.value->setGeometry(cur_x, max_y, base_len * 2, base_len * 3);
-      card_label.value->show();
+      // card_label.value->show();
       card_label.value->raise();
       cur_x += base_len;
     }
@@ -515,17 +515,16 @@ void DeckWidget::resizeEvent(QResizeEvent *) {
     const int base_x = (width - base_len * 3) / 2;
     for (auto &card_label : *card_multiset_) {
       card_label.value->setGeometry(base_x, cur_y, base_len * 3, base_len * 2);
-      card_label.value->show();
+      // card_label.value->show();
       card_label.value->raise();
       cur_y += base_len;
     }
   }
 }
 
-DeskWidget::DeskWidget(QWidget *parent, const bool direction,
-                       const GameType type, const short number_of_cards,
-                       const Card cards[])
-    : QWidget(parent), direction_(direction) {
+DeskWidget::DeskWidget(QWidget *parent, const bool overlap, const GameType type,
+                       const short number_of_cards, const Card cards[])
+    : QWidget(parent), overlap_(overlap) {
   setAttribute(Qt::WA_DeleteOnClose);
   if (number_of_cards <= 0) {
     text_label_ = new QLabel(this);
@@ -544,7 +543,7 @@ DeskWidget::DeskWidget(QWidget *parent, const bool direction,
                                                      const PCardLabel &)>(
       PCardLabelLess[type]);
   for (int i = 0; i < number_of_cards; i++)
-    card_multiset_->insert(new CardLabel(this, cards[i], direction_));
+    card_multiset_->insert(new CardLabel(this, cards[i], true));
 }
 
 void DeskWidget::resizeEvent(QResizeEvent *) {
@@ -554,7 +553,7 @@ void DeskWidget::resizeEvent(QResizeEvent *) {
   }
   const int cur_height = height();
   const int cur_width = width();
-  if (direction_) {
+  if (!overlap_) {
     const int base_len =
         std::min<int>(cur_height / 3, cur_width / (card_multiset_->size() * 2));
     int cur_x = (cur_width - base_len * (card_multiset_->size() * 2)) / 2;
@@ -566,13 +565,13 @@ void DeskWidget::resizeEvent(QResizeEvent *) {
     }
   } else {
     const int base_len =
-        std::min<int>(cur_height / (card_multiset_->size() * 2), cur_width / 3);
-    int cur_y = (cur_height - base_len * (card_multiset_->size() * 2)) / 2;
-    const int base_x = (cur_width - base_len * 3) / 2;
+        std::min<int>(cur_height / 3, cur_width / (card_multiset_->size() + 1));
+    int cur_x = (cur_width - base_len * (card_multiset_->size() + 1)) / 2;
+    const int cur_y = (cur_height - base_len * 3) / 2;
     for (auto &card_label : *card_multiset_) {
-      card_label.value->setGeometry(base_x, cur_y, base_len * 3, base_len * 2);
+      card_label.value->setGeometry(cur_x, cur_y, base_len * 2, base_len * 3);
       card_label.value->raise();
-      cur_y += base_len * 2;
+      cur_x += base_len;
     }
   }
 }
@@ -705,7 +704,7 @@ bool PlayWidget::UpdateCards(const unsigned short id, const short delta,
         deck[0], new QResizeEvent(deck[0]->size(), deck[0]->size()));
   if (show) {
     delete glayout_->itemAtPosition(pos_x[id], pos_y[id])->widget();
-    glayout_->addWidget(new DeskWidget(this, true, type_, delta, cards),
+    glayout_->addWidget(new DeskWidget(this, id != 0, type_, delta, cards),
                         pos_x[id], pos_y[id]);
   }
   return true;
