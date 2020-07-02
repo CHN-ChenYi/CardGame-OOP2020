@@ -30,6 +30,8 @@ struct Card {
   bool operator == (Card &u){return suit==u.suit&&rank==u.rank;}
   bool operator == (const Card &u){return suit==u.suit&&rank==u.rank;}
   Card(Suit suit = Club, unsigned short rank = 16) {this->suit = suit; this->rank = rank;}
+  Card(const Card& u){this->suit = u.suit; this->rank = u.rank;}
+  Card & operator = (const Card & u) {this->suit = u.suit; this->rank = u.rank; return *this;}
   wstring towstring() const
   {
       wstring ret = L"[";

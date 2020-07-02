@@ -509,7 +509,7 @@ void AIChange(unsigned short i)
     for(int j=2;j>=0;j--)
     {
         tochange[(1+i+round)%num_of_player].ins(current_card[tr(i)].cards[tmp[j]]);
-        current_card[tr(i)].DeleteCard(j);
+        current_card[tr(i)].DeleteCard(tmp[j]);
     }
 }
 void StartGame() {
