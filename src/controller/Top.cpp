@@ -681,6 +681,7 @@ void Play(const Card cards[], const unsigned short size)
             window->UpdateCards(0, 0);
             return;
         }
+        window->SetInfo(L"已出牌");
         DeleteFromCardList(current_card[0].cards, current_card[0].size, cards, size);
         window->UpdateCards(0, 3, cards, false);
         canplay = 0;
@@ -709,6 +710,7 @@ void Play(const Card cards[], const unsigned short size)
         window->UpdateCards(0, 0);
         return;
     }
+    window->SetInfo(L"已出牌");
     for(int i=0;i<size;i++)hist_card[hist_size].cards[i] = cards[i];
     hist_card[hist_size].size = size;
     hist_size++;
