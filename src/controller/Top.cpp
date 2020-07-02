@@ -661,6 +661,7 @@ void Play(const Card cards[], const unsigned short size)
 {
     if(canplay == 0)
     {
+        window->SetInfo(L"未轮到你出牌");
         window->UpdateCards(0, 0);
         return;
     }
@@ -672,6 +673,7 @@ void Play(const Card cards[], const unsigned short size)
     {
         if(size!=3)
         {
+            window->SetInfo(L"换牌张数不符合要求");
             window->UpdateCards(0, 0);
             return;
         }
@@ -699,6 +701,7 @@ void Play(const Card cards[], const unsigned short size)
 
     if(!CheckRules(cards, size, current_type, current_card[0]))
     {
+        window->SetInfo(L"出牌不符合规则");
         window->UpdateCards(0, 0);
         return;
     }
