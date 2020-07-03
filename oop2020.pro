@@ -47,6 +47,7 @@ HEADERS += \
     src/network/include/common.h \
     src/template/ContentWidget.h \
     src/template/MainWindow.h \
+    src/controller/Top.h \
     src/controller/parse.h
 
 RESOURCES += \

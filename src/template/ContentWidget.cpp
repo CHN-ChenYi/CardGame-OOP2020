@@ -2,10 +2,8 @@
 
 #include <QComboBox>
 #include <QCoreApplication>
-#include <QDebug>
 #include <QGridLayout>
 #include <QHBoxLayout>
-#include <QLabel>
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPainter>
@@ -14,8 +12,22 @@
 #include <QVBoxLayout>
 #include <algorithm>
 #include <sstream>
+#ifndef _DEBUG
+#define QT_NO_DEBUG_OUTPUT
+#endif
+#include <QDebug>
 
-#include "MainWindow.h"
+bool (*CardLess[2])(const Card &, const Card &) = {
+    [](const Card &lhs, const Card &rhs) {
+      static constexpr short rank_winner[17] = {
+          -1, 12, 13, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, -1};
+      return rank_winner[lhs.rank] < rank_winner[rhs.rank];
+    },
+    [](const Card &lhs, const Card &rhs) {
+      static constexpr short rank_heart[17] = {-1, 13, 1,  2,  3,  4,  5,  6, 7,
+                                               8,  9,  10, 11, 12, 14, 15, -1};
+      return rank_heart[lhs.rank] < rank_heart[rhs.rank];
+    }};
 
 NetworkCircle::NetworkCircle(QWidget *parent, const double network_status,
                              const int height)

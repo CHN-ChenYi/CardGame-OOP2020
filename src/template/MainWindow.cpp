@@ -1,22 +1,13 @@
 ﻿#include "MainWindow.h"
 
-#include <QDebug>
 #include <QTextEdit>
 #include <QtWidgets>
+#ifndef _DEBUG
+#define QT_NO_DEBUG_OUTPUT
+#endif
+#include <QDebug>
 
 #include "ContentWidget.h"
-
-bool (*CardLess[2])(const Card &, const Card &) = {
-    [](const Card &lhs, const Card &rhs) {
-      static constexpr short rank_winner[17] = {
-          -1, 12, 13, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, -1};
-      return rank_winner[lhs.rank] < rank_winner[rhs.rank];
-    },
-    [](const Card &lhs, const Card &rhs) {
-      static constexpr short rank_heart[17] = {-1, 13, 1,  2,  3,  4,  5,  6, 7,
-                                               8,  9,  10, 11, 12, 14, 15, -1};
-      return rank_heart[lhs.rank] < rank_heart[rhs.rank];
-    }};
 
 MainWindow::MainWindow() : timer_(NULL) {
   content_ = new HomeWidget(this);
@@ -88,14 +79,12 @@ void MainWindow::NewGame() {
   delete content_;
   content_ = new InitOrJoinWidget(this, 0);
   setCentralWidget(content_);
-  qDebug() << "new Game";
 }
 
 void MainWindow::JoinGame() {
   delete content_;
   content_ = new InitOrJoinWidget(this, 1);
   setCentralWidget(content_);
-  qDebug() << "join Game";
 }
 
 void MainWindow::DrawHomePage() {

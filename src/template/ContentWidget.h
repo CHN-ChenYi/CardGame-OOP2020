@@ -2,8 +2,6 @@
 
 #include "MainWindow.h"
 
-#include <QBoxLayout>
-#include <QDebug>
 #include <QLabel>
 #include <QWidget>
 #include <set>
@@ -16,10 +14,13 @@ class MainWindow;
 QT_BEGIN_NAMESPACE
 class QLineEdit;
 class QComboBox;
+class QBoxLayout;
 class QVBoxLayout;
 class QHBoxLayout;
 class QGridLayout;
 QT_END_NAMESPACE
+
+extern bool (*CardLess[2])(const Card &, const Card &);
 
 class NetworkCircle : public QWidget {
  public:
@@ -49,9 +50,7 @@ class HomeWidget : public ContentWidget {
  public:
   explicit HomeWidget(MainWindow *parent);
   ~HomeWidget();
-  void SetInfo(const wstring &) override {
-    qDebug() << "Can't find HomeWidget::SetInfo";
-  }
+  void SetInfo(const wstring &) override { return; }
 
  private:
   QVBoxLayout *vlayout_;

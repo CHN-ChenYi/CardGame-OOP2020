@@ -1,9 +1,12 @@
 ﻿#include <fcntl.h>
 #include <io.h>
-#include <QDebug>
 #include <queue>
-#include "src/AI/AI.h"
+#ifndef _DEBUG
+#define QT_NO_DEBUG_OUTPUT
+#endif
+#include <QDebug>
 #include "parse.h"
+#include "src/AI/AI.h"
 #include "src/network/include/Client.h"
 #include "src/network/include/MeyaS.h"
 #include "src/network/include/Server.h"
