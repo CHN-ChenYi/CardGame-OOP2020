@@ -496,7 +496,7 @@ void DeckWidget::resizeEvent(QResizeEvent *) {
         card_label.value->SetMaxY(max_y);
       }
       card_label.value->setGeometry(cur_x, max_y, base_len * 2, base_len * 3);
-      // card_label.value->show();
+      card_label.value->show();
       card_label.value->raise();
       cur_x += base_len;
     }
@@ -507,7 +507,7 @@ void DeckWidget::resizeEvent(QResizeEvent *) {
     const int base_x = (width - base_len * 3) / 2;
     for (auto &card_label : *card_multiset_) {
       card_label.value->setGeometry(base_x, cur_y, base_len * 3, base_len * 2);
-      // card_label.value->show();
+      card_label.value->show();
       card_label.value->raise();
       cur_y += base_len;
     }
