@@ -744,6 +744,10 @@ void PlayWidget::Skip() { ::Play(NULL, 0); }
 
 void PlayWidget::Confirm() {
   const unsigned short num = deck[0]->GetNumOfChoosenCard();
+  if (!num) {
+    SetInfo(L"请选择至少一张牌");
+    return;
+  }
   const Card *const cards = deck[0]->GetChoosenCard(num);
   ::Play(cards, num);
 }
