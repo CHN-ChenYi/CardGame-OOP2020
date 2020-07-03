@@ -672,7 +672,7 @@ void letplay(const unsigned short id)
 {
     now_player = id;
     if(final_winner != -1) return;
-    Sleep(500);
+    Sleep(1500);
     //static int cnt = 0;
     qDebug()<<"letplay"<<id;
     if(id == 0)
