@@ -1184,7 +1184,7 @@ void calc_statistics()
         final_winner = now;
         if(current_type == Hearts)
         {
-            for(int i=0;i<num_of_player;i++)if(points[tr(i)]<points[tr(now)]) final_winner=i;
+            for(int i=0;i<num_of_player;i++)if(points[tr(i)]<points[tr(final_winner)]) final_winner=i;
         }
     }
 }
