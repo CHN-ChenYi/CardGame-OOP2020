@@ -19,14 +19,12 @@ enum Suit {
   Heart,    // ∫ÏÃ“
   Spade     // ∫⁄Ã“
 };
-
 struct Card {
   Suit suit;
   // 1 for A, 11 for J, 12 for Q, 13 for K, 14 for small Joker, 15 for the big
   // Joker, 16 for unknown
   unsigned short rank;
 };
-
 class card_list
 {
 	public:
@@ -801,6 +799,7 @@ const unsigned short hist_size, // the size of Last_cards
 unsigned short &size
 )
 {
+	
 	min_round=17;
 	max_bomb=0;
 	int hand_card[3];
@@ -830,6 +829,15 @@ unsigned short &size
 	//cout<<endl;
 	analysis(num,0);
 	//cout<<min_round<<endl;
+	for(int i=1;i<=min_round;i++)
+	{
+		unsigned short size;
+		unsigned short *ans=min_result[i]->play_card(yours,size);
+		/*cout<<size<<" ";
+		for(int j=0;j<size;j++)
+		cout<<yours.cards[ans[j]].rank<<" ";
+		cout<<endl;//*/
+	}
 	int remain_num[17];
 	for(int i=1;i<=13;i++) remain_num[i]=4;
 	remain_num[14]=1;remain_num[15]=1;
@@ -1233,9 +1241,11 @@ const unsigned short hist_size // the size of Last_cards
 			g[i][0][0][l]=1;
 		}
 	}
+	
 	memset(have_card,1,sizeof(have_card));
 	memset(vis,1,sizeof(vis));
 	int round_start=(5-rank)%4;
+	if(hist_size!=0)
 	for(int i=(hist_size-1)/4-1+(round_start==0?1:0);i>=0;i--)
 	{
 		int round_color=hist_cards[i*4].cards[0].suit,max_point=0,max_person;
@@ -1262,8 +1272,8 @@ const unsigned short hist_size // the size of Last_cards
 		int round_color=hist_cards[hist_size-rank+1].cards[0].suit;
 		if(hist_cards[i].cards[0].suit!=round_color)
 		{
-			have_card[i][round_color]=0;
-			round_start++;
+			have_card[round_start][round_color]=0;
+			round_start++;if(round_start>3) round_start-=4;
 		}
 	}
 	int num[5];
@@ -1290,13 +1300,16 @@ const unsigned short hist_size // the size of Last_cards
 	}
 	unsigned short *ans;
 	ans=new unsigned short;
+	
 	if(If_Card(yours,Club,1))
 	{
 		ans[0]=Find_Card(yours,Club,1);
 		return ans;
 	}
+	
 	for(int i=0;i<hist_size;i++)
 	{
+		//cout<<hist_cards[i].cards[0].suit<<" "<<hist_cards[i].cards[0].rank<<endl;
 		vis[Trans(hist_cards[i].cards[0])]=0;
 		if(hist_cards[i].cards[0].suit==Heart) break_heart=1;
 	}
@@ -1309,7 +1322,7 @@ const unsigned short hist_size // the size of Last_cards
 		{
 			if(hist_cards[i].cards[0].suit==round_color) max_point=max(max_point,1*hist_cards[i].cards[0].rank);
 		}
-		if(If_Card(yours,Club,13))
+		if(If_Card(yours,Club,13)&&round_color==Club)
 		{
 			ans[0]=Find_Card(yours,Club,13);
 			return ans;
@@ -1368,7 +1381,9 @@ const unsigned short hist_size // the size of Last_cards
 			{
 				ans[0]=Find_Card(yours,round_color,Smallest_Rank(yours,round_color));
 			}
-			if(num[round_color]!=1||round_color!=Spade||!If_Card(yours,round_color,11))
+			if(round_color!=Spade)
+			ans[0]=Find_Card(yours,round_color,Largest_Rank(yours,round_color));
+			else if(num[round_color]!=1||!If_Card(yours,round_color,11))
 			ans[0]=Find_Card(yours,round_color,Special_Largest_Rank2(yours,round_color));
 			else ans[0]=Find_Card(yours,round_color,11);
 			return ans;
@@ -1415,7 +1430,7 @@ const unsigned short hist_size // the size of Last_cards
 		prob[3]=f[out_spade][num_person[Spade]][num_person[Spade]];
 		prob[0]=f[out_club][num_person[Club]][num_person[Club]];
 		prob[1]=f[out_diamond][num_person[Diamond]][num_person[Diamond]];
-		double min_prob=1,min_num=15,min_color;
+		double min_prob=1.1,min_num=15,min_color;
 		for(int i=0;i<4;i++)
 		{
 			if(Smallest_Rank(yours,i)==-1) continue;
@@ -1668,4 +1683,3 @@ unsigned short* Exchange_Hearts(const card_list yours)
 		rank=(4+rank-pla)%4;
 	}
 }*/
-
