@@ -702,8 +702,16 @@ void letplay(const unsigned short id)
         calc_statistics();
         if(final_winner == -1)
         {
-            window->ClearDesk(tr((id+1)%num_of_player));
-            letplay((id+1)%num_of_player);
+            if(current_type == Hearts && hist_size % num_of_player == 0)
+            {
+                window->ClearDesk(tr(first_player));
+                letplay(first_player);
+            }
+            else
+            {
+                window->ClearDesk(tr((id+1)%num_of_player));
+                letplay((id+1)%num_of_player);
+            }
         }
     }
     else
@@ -1123,7 +1131,7 @@ void calc_statistics()
         {
             Card tmp2 = hist_card[hist_size-i].cards[0];
             pt += card_value(tmp2);
-            if(tmp.suit == tmp2.suit && (tmp2.rank == 1 || tmp2.rank > tmp.rank))
+            if(tmp.suit == tmp2.suit && (tmp2.rank == 1 || (tmp2.rank > tmp.rank && tmp.rank != 1)))
             {
                 tmp = tmp2;
                 pos = (now-i+1+num_of_player)%num_of_player;
