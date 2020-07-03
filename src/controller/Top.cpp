@@ -840,6 +840,7 @@ void PlayAgain()
         for(int i=0;i<4;i++)number_of_cards[i]=current_card[i].size;
         window->DrawPlayingPage(current_type, player_names, number_of_cards, network_status,
                                 controlled_by_bot, current_card[0].cards);
+        window->UpdateStatistics(points);
     }
     else
     {
@@ -859,6 +860,9 @@ void PlayAgain()
             qDebug() << s << endl;
             stream->sendLineW(s);
             stream->sendLineW(L"-replay");
+            s = L"-score";
+            for(int j=0;j<num_of_player;j++) s+=L" "+player_names[tr(j)]+L" "+to_wstring(points[tr(j)]);
+            stream->sendLineW(s);
         }
     }
     if(current_type == Hearts)
