@@ -444,6 +444,11 @@ void ClientEventProcess()
         for(int i=0;i<num_of_player;i++)window->UpdatePlayer(tr(i), network_status[tr(i)], controlled_by_bot[tr(i)]);
         return;
     }
+    if(s.length() >= 6 && s.substr(0,6) == L"-clear")
+    {
+        for(int i=0;i<num_of_player;i++)window->ClearDesk(tr(i));
+        return;
+    }
 }
 
 void NewGame(const wstring &password, const wstring &player_name,
@@ -1141,11 +1146,14 @@ void calc_statistics()
         first_player = pos;
         qDebug()<<"lastwinner"<<" "<<pos;
         for(int i=0;i<num_of_player;i++)window->ClearDesk(tr(i));
-        if(pt == 0)return;
-        points[tr(pos)] += pt;
-        qDebug()<<"points";
-        for(int i=0;i<num_of_player;i++)qDebug()<<points[i];
-        window->UpdateStatistics(points);
+        for(int i=1;i<num_of_player;i++)if(route[i]!=-1){soc.getPeers().at(route[i])->getPeer()->sendLineW(L"-clear");}
+        if(pt != 0)
+        {
+            points[tr(pos)] += pt;
+            qDebug()<<"points";
+            for(int i=0;i<num_of_player;i++)qDebug()<<points[i];
+            window->UpdateStatistics(points);
+        }
     }
     else
     {
