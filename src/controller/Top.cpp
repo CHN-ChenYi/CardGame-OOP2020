@@ -444,6 +444,11 @@ void ClientEventProcess()
         for(int i=0;i<num_of_player;i++)window->UpdatePlayer(tr(i), network_status[tr(i)], controlled_by_bot[tr(i)]);
         return;
     }
+    if(s.length() >= 6 && s.substr(0,6) == L"-clear")
+    {
+        for(int i=0;i<num_of_player;i++)window->ClearDesk(tr(i));
+        return;
+    }
 }
 
 void NewGame(const wstring &password, const wstring &player_name,
@@ -667,6 +672,7 @@ void letplay(const unsigned short id)
 {
     now_player = id;
     if(final_winner != -1) return;
+    Sleep(1500);
     //static int cnt = 0;
     qDebug()<<"letplay"<<id;
     if(id == 0)
@@ -702,8 +708,16 @@ void letplay(const unsigned short id)
         calc_statistics();
         if(final_winner == -1)
         {
-            window->ClearDesk(tr((id+1)%num_of_player));
-            letplay((id+1)%num_of_player);
+            if(current_type == Hearts && hist_size % num_of_player == 0)
+            {
+                window->ClearDesk(tr(first_player));
+                letplay(first_player);
+            }
+            else
+            {
+                window->ClearDesk(tr((id+1)%num_of_player));
+                letplay((id+1)%num_of_player);
+            }
         }
     }
     else
@@ -826,6 +840,7 @@ void PlayAgain()
         for(int i=0;i<4;i++)number_of_cards[i]=current_card[i].size;
         window->DrawPlayingPage(current_type, player_names, number_of_cards, network_status,
                                 controlled_by_bot, current_card[0].cards);
+        window->UpdateStatistics(points);
     }
     else
     {
@@ -845,6 +860,9 @@ void PlayAgain()
             qDebug() << s << endl;
             stream->sendLineW(s);
             stream->sendLineW(L"-replay");
+            s = L"-score";
+            for(int j=0;j<num_of_player;j++) s+=L" "+player_names[tr(j)]+L" "+to_wstring(points[tr(j)]);
+            stream->sendLineW(s);
         }
     }
     if(current_type == Hearts)
@@ -1123,7 +1141,7 @@ void calc_statistics()
         {
             Card tmp2 = hist_card[hist_size-i].cards[0];
             pt += card_value(tmp2);
-            if(tmp.suit == tmp2.suit && (tmp2.rank == 1 || tmp2.rank > tmp.rank))
+            if(tmp.suit == tmp2.suit && (tmp2.rank == 1 || (tmp2.rank > tmp.rank && tmp.rank != 1)))
             {
                 tmp = tmp2;
                 pos = (now-i+1+num_of_player)%num_of_player;
@@ -1131,11 +1149,15 @@ void calc_statistics()
         }
         first_player = pos;
         qDebug()<<"lastwinner"<<" "<<pos;
-        if(pt == 0)return;
-        points[tr(pos)] += pt;
-        qDebug()<<"points";
-        for(int i=0;i<num_of_player;i++)qDebug()<<points[i];
-        window->UpdateStatistics(points);
+        for(int i=0;i<num_of_player;i++)window->ClearDesk(tr(i));
+        for(int i=1;i<num_of_player;i++)if(route[i]!=-1){soc.getPeers().at(route[i])->getPeer()->sendLineW(L"-clear");}
+        if(pt != 0)
+        {
+            points[tr(pos)] += pt;
+            qDebug()<<"points";
+            for(int i=0;i<num_of_player;i++)qDebug()<<points[i];
+            window->UpdateStatistics(points);
+        }
     }
     else
     {
@@ -1162,7 +1184,7 @@ void calc_statistics()
         final_winner = now;
         if(current_type == Hearts)
         {
-            for(int i=0;i<num_of_player;i++)if(points[tr(i)]<points[tr(now)]) final_winner=i;
+            for(int i=0;i<num_of_player;i++)if(points[tr(i)]<points[tr(final_winner)]) final_winner=i;
         }
     }
 }
