@@ -1,5 +1,6 @@
 #include "ContentWidget.h"
 
+#include <QApplication>
 #include <QComboBox>
 #include <QCoreApplication>
 #include <QDebug>
@@ -143,14 +144,6 @@ void InitOrJoinWidget::SetInfo(const wstring &info) {
 }
 
 void InitOrJoinWidget::Accept() {
-  if (!first_input_->text().length()) {
-    SetInfo(L"服务器密码不能为空");
-    return;
-  }
-  if (!second_input_->text().length()) {
-    SetInfo(L"玩家昵称不能为空");
-    return;
-  }
   if (widget_type_) {
     ::JoinGame(first_input_->text().toStdWString(),
                second_input_->text().toStdWString());
@@ -592,8 +585,6 @@ PlayWidget::PlayWidget(MainWindow *parent, const GameType type,
                              number_of_cards[i], network_status[i],
                              controlled_by_bot[i], i ? NULL : cards);
 
-  for (int i = 0; i < 4; i++) qDebug() << player_name[i];
-
   main_layout_ = new QHBoxLayout(this);
   main_layout_->setMargin(2);
   main_layout_->setSpacing(2);
@@ -707,6 +698,7 @@ bool PlayWidget::UpdateCards(const unsigned short id, const short delta,
     glayout_->addWidget(new DeskWidget(this, id != 0, type_, delta, cards),
                         pos_x[id], pos_y[id]);
   }
+  QApplication::processEvents();
   return true;
 }
 

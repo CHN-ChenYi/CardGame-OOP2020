@@ -667,6 +667,7 @@ void letplay(const unsigned short id)
 {
     now_player = id;
     if(final_winner != -1) return;
+    Sleep(500);
     //static int cnt = 0;
     qDebug()<<"letplay"<<id;
     if(id == 0)
@@ -1139,6 +1140,7 @@ void calc_statistics()
         }
         first_player = pos;
         qDebug()<<"lastwinner"<<" "<<pos;
+        for(int i=0;i<num_of_player;i++)window->ClearDesk(tr(i));
         if(pt == 0)return;
         points[tr(pos)] += pt;
         qDebug()<<"points";

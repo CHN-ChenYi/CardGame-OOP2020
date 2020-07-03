@@ -9,25 +9,23 @@
 #define ll long long
 using namespace std;
 
-/*
-enum GameType {
+
+/*enum GameType {
   Winner,  // 争上游
   Hearts   // 红心大战
 };
 enum Suit {
   Club,     // 梅花
   Diamond,  // 方块
+  Spade,     // 黑桃
   Heart,    // 红桃
-  Spade     // 黑桃
 };
-
 struct Card {
   Suit suit;
   // 1 for A, 11 for J, 12 for Q, 13 for K, 14 for small Joker, 15 for the big
   // Joker, 16 for unknown
   unsigned short rank;
 };
-
 class card_list
 {
     public:
@@ -809,7 +807,7 @@ unsigned short &size
 {
     min_round=17;
     max_bomb=0;
-    int hand_card[3];
+    int hand_card[19];
     hand_card[1]=hand_card[2]=18;
     int now_pla=0;
     for(int i=hist_size-1;i>=0;i--)
@@ -1281,6 +1279,7 @@ const unsigned short hist_size // the size of Last_cards
         }
     }
     round_start=(5-rank)%4;
+
     for(int i=hist_size-rank+1;i<hist_size;i++)
     {
         int round_color=hist_cards[hist_size-rank+1].cards[0].suit;
@@ -1297,19 +1296,19 @@ const unsigned short hist_size // the size of Last_cards
         Card temp=yours.cards[i];
         if(temp.suit==Spade)
         {
-            num[3]++;
+            num[Spade]++;
         }
         if(temp.suit==Heart)
         {
-            num[2]++;
+            num[Heart]++;
         }
         if(temp.suit==Club)
         {
-            num[0]++;
+            num[Club]++;
         }
         if(temp.suit==Diamond)
         {
-            num[1]++;
+            num[Diamond]++;
         }
     }//cout<<"ok";
     unsigned short *ans;
@@ -1365,7 +1364,7 @@ const unsigned short hist_size // the size of Last_cards
                 double prob=g[num_now][4-rank][4-rank][3];
                 if(prob>lose_limit&&all&&(!round_color==Spade||Smallest_Rank(yours,round_color)<11))
                 {
-                    if(round_color!=Spade||!vis[49])
+                    if(round_color!=Spade||!vis[Spade*13+10])
                     ans[0]=Find_Card(yours,round_color,Largest_Rank(yours,round_color));
                     else ans[0]=Find_Card(yours,round_color,Special_Largest_Rank(yours,round_color));
                     return ans;
@@ -1386,6 +1385,7 @@ const unsigned short hist_size // the size of Last_cards
             }
             if(my_point)
             {
+
                 ans[0]=Find_Card(yours,round_color,my_point);
                 return ans;
             }
@@ -1449,11 +1449,11 @@ const unsigned short hist_size // the size of Last_cards
             }
         }
         double prob[5];
-        prob[2]=f[out_heart][num_person[Heart]][num_person[Heart]];
-        prob[3]=f[out_spade][num_person[Spade]][num_person[Spade]];
-        prob[0]=f[out_club][num_person[Club]][num_person[Club]];
+        prob[Heart]=f[out_heart][num_person[Heart]][num_person[Heart]];
+        prob[Spade]=f[out_spade][num_person[Spade]][num_person[Spade]];
+        prob[Club]=f[out_club][num_person[Club]][num_person[Club]];
         //cout<<out_club<<" "<<num_person[Club]<<" "<<num_person[Club]<<endl;
-        prob[1]=f[out_diamond][num_person[Diamond]][num_person[Diamond]];
+        prob[Diamond]=f[out_diamond][num_person[Diamond]][num_person[Diamond]];
         double min_prob=1.1;int min_num=15,min_color;
         //for(int i=0;i<yours.size;i++)
         //cout<<yours.cards[i].suit<<" "<<yours.cards[i].rank<<endl;
@@ -1659,7 +1659,7 @@ unsigned short* Exchange_Hearts(const card_list yours)
 {
     int cnt=-1;Card temp[55];
     int x=time(0);
-    srand(time(0));
+    srand(233);
     cout<<x<<endl;
     for(int i=0;i<4;i++)
     {
@@ -1737,3 +1737,70 @@ unsigned short* Exchange_Hearts(const card_list yours)
         rank=(rank+pla)%4;
     }
 }//*/
+/*
+____________________
+0 2
+0 11
+0 12
+0 13
+____________________
+1 4
+1 2
+1 3
+1 10
+____________________
+1 5
+1 1
+1 12
+1 13
+____________________
+3 3
+3 9
+3 6
+3 8
+____________________
+3 5
+3 4
+3 2
+3 12
+____________________
+3 11
+2 6
+3 1
+3 10
+____________________
+3 13
+3 7
+2 1
+1 11
+____________________
+2 4
+2 3
+2 13
+1 8
+____________________
+2 5
+0 1
+2 8
+2 12
+____________________
+1 7
+2 11
+0 9
+1 6
+____________________
+1 9
+2 10
+0 7
+2 7
+____________________
+2 2
+0 10
+0 6
+0 5
+____________________
+2 9
+0 8
+0 4
+0 3
+*/

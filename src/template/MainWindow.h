@@ -18,8 +18,8 @@ enum GameType {
 enum Suit {
   Club,     // 梅花
   Diamond,  // 方块
-  Heart,    // 红桃
-  Spade     // 黑桃
+  Spade,     // 黑桃
+  Heart    // 红桃
 };
 
 struct Card {
