@@ -780,6 +780,7 @@ bool PlayWidget::UpdateCards(const unsigned short id, const short delta,
     glayout_->addWidget(new DeskWidget(this, id != 0, type_, delta, cards),
                         pos_x[id], pos_y[id]);
   }
+  // process repaint event immediately
   QApplication::processEvents();
   return true;
 }
