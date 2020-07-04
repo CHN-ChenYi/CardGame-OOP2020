@@ -20,7 +20,7 @@ class MainWindow : public QMainWindow {
   MainWindow();
   void StartNetworkEventLoop(int interval);  // in milliseconds
   void EndNetworkEventLoop();
-  void SetInfo(const wstring &info);
+  void SetInfo(const wstring &info);  // for all pages except Home Page
   void DrawHomePage();
   void DrawInitPage();
   void DrawJoinPage();

@@ -33,6 +33,7 @@ MainWindow::MainWindow() : timer_(NULL) {
   QMenu *file_menu = menuBar()->addMenu("File");
   file_menu->addAction(home_act);
   file_menu->addAction(exit_act);
+
   QMenu *help_menu = menuBar()->addMenu("Help");
   help_menu->addAction(manual_act);
   help_menu->addAction(about_act);
@@ -210,5 +211,6 @@ ManualWindow::ManualWindow() {
 }
 
 void ManualWindow::resizeEvent(QResizeEvent *) {
+  // make the size of the text be the same as the manual window
   text_->setGeometry(0, 0, geometry().width(), geometry().height());
 }
