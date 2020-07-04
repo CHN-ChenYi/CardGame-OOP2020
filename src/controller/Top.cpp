@@ -1,10 +1,7 @@
 ﻿#include <fcntl.h>
 #include <io.h>
-#include <queue>
-#ifndef _DEBUG
-#define QT_NO_DEBUG_OUTPUT
-#endif
 #include <QDebug>
+#include <queue>
 #include "parse.h"
 #include "src/AI/AI.h"
 #include "src/network/include/Client.h"

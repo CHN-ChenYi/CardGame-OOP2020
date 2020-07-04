@@ -1,6 +1,3 @@
-#ifndef _DEBUG
-#define QT_NO_DEBUG_OUTPUT
-#endif
 #include <QDebug>
 
 #include "..\include\DataStream.h"

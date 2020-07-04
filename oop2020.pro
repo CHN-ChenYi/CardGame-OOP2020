@@ -54,3 +54,5 @@ RESOURCES += \
     src/template/Resource.qrc
 
 QMAKE_LFLAGS += -no-pie
+
+DEFINES += QT_NO_DEBUG_OUTPUT

@@ -1,11 +1,8 @@
 ﻿#include "MainWindow.h"
 
+#include <QDebug>
 #include <QTextEdit>
 #include <QtWidgets>
-#ifndef _DEBUG
-#define QT_NO_DEBUG_OUTPUT
-#endif
-#include <QDebug>
 
 #include "ContentWidget.h"
 

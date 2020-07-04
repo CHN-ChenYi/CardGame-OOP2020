@@ -13,9 +13,6 @@
 #include <QVBoxLayout>
 #include <algorithm>
 #include <sstream>
-#ifndef _DEBUG
-#define QT_NO_DEBUG_OUTPUT
-#endif
 #include <QDebug>
 
 bool (*CardLess[2])(const Card &, const Card &) = {
