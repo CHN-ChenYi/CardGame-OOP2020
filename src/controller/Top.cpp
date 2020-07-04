@@ -2,8 +2,8 @@
 #include <io.h>
 #include <QDebug>
 #include <queue>
-#include "src/AI/AI.h"
 #include "parse.h"
+#include "src/AI/AI.h"
 #include "src/network/include/Client.h"
 #include "src/network/include/MeyaS.h"
 #include "src/network/include/Server.h"

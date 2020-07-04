@@ -1,6 +1,7 @@
-#include "..\include\Timer.h"
+#include <QDebug>
+
 #include "..\include\DataStream.h"
-#include<QDebug>
+#include "..\include\Timer.h"
 int MeyaS::DataStream::send(const DataPack &data) {
     return socket->send(data);
 }

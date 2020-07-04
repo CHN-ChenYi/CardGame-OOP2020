@@ -47,9 +47,12 @@ HEADERS += \
     src/network/include/common.h \
     src/template/ContentWidget.h \
     src/template/MainWindow.h \
+    src/controller/Top.h \
     src/controller/parse.h
 
 RESOURCES += \
     src/template/Resource.qrc
 
 QMAKE_LFLAGS += -no-pie
+
+DEFINES += QT_NO_DEBUG_OUTPUT

@@ -6,18 +6,6 @@
 
 #include "ContentWidget.h"
 
-bool (*CardLess[2])(const Card &, const Card &) = {
-    [](const Card &lhs, const Card &rhs) {
-      static constexpr short rank_winner[17] = {
-          -1, 12, 13, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, -1};
-      return rank_winner[lhs.rank] < rank_winner[rhs.rank];
-    },
-    [](const Card &lhs, const Card &rhs) {
-      static constexpr short rank_heart[17] = {-1, 13, 1,  2,  3,  4,  5,  6, 7,
-                                               8,  9,  10, 11, 12, 14, 15, -1};
-      return rank_heart[lhs.rank] < rank_heart[rhs.rank];
-    }};
-
 MainWindow::MainWindow() : timer_(NULL) {
   content_ = new HomeWidget(this);
   setCentralWidget(content_);
@@ -42,6 +30,7 @@ MainWindow::MainWindow() : timer_(NULL) {
   QMenu *file_menu = menuBar()->addMenu("File");
   file_menu->addAction(home_act);
   file_menu->addAction(exit_act);
+
   QMenu *help_menu = menuBar()->addMenu("Help");
   help_menu->addAction(manual_act);
   help_menu->addAction(about_act);
@@ -88,14 +77,12 @@ void MainWindow::NewGame() {
   delete content_;
   content_ = new InitOrJoinWidget(this, 0);
   setCentralWidget(content_);
-  qDebug() << "new Game";
 }
 
 void MainWindow::JoinGame() {
   delete content_;
   content_ = new InitOrJoinWidget(this, 1);
   setCentralWidget(content_);
-  qDebug() << "join Game";
 }
 
 void MainWindow::DrawHomePage() {
@@ -221,5 +208,6 @@ ManualWindow::ManualWindow() {
 }
 
 void ManualWindow::resizeEvent(QResizeEvent *) {
+  // make the size of the text be the same as the manual window
   text_->setGeometry(0, 0, geometry().width(), geometry().height());
 }
