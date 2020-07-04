@@ -508,14 +508,14 @@ void deal_cards()
     {
         if(current_type == Winner)
         {
-            for(int i=0;i<rand()%50;i++)random_shuffle(tmpcard, tmpcard+54);
+            for(int i=0;i<rand()%50+5;i++)random_shuffle(tmpcard, tmpcard+54);
             current_card[0].size = current_card[1].size = 0;
             for(int i=0;i<22;i++) current_card[0].ins(tmpcard[i]);
             for(int i=22;i<44;i++) current_card[1].ins(tmpcard[i]);
         }
         else
         {
-            for(int i=0;i<rand()%50;i++)random_shuffle(tmpcard, tmpcard+52);
+            for(int i=0;i<rand()%50+5;i++)random_shuffle(tmpcard, tmpcard+52);
             current_card[0].size = current_card[1].size = 0;
             for(int i=0;i<26;i++) current_card[0].ins(tmpcard[i]);
             for(int i=26;i<52;i++) current_card[1].ins(tmpcard[i]);
@@ -525,7 +525,7 @@ void deal_cards()
     {
         if(current_type == Winner)
         {
-            for(int i=0;i<rand()%50;i++)random_shuffle(tmpcard, tmpcard+54);
+            for(int i=0;i<rand()%50+5;i++)random_shuffle(tmpcard, tmpcard+54);
             current_card[0].size = current_card[2].size = current_card[3].size = 0;
             for(int i=0;i<18;i++) current_card[0].ins(tmpcard[i]);
             for(int i=18;i<36;i++) current_card[2].ins(tmpcard[i]);
@@ -533,7 +533,7 @@ void deal_cards()
         }
         else
         {
-            for(int i=0;i<rand()%50;i++)random_shuffle(tmpcard, tmpcard+52);
+            for(int i=0;i<rand()%50+5;i++)random_shuffle(tmpcard, tmpcard+52);
             while(tmpcard[52]==Card(Spade, 12)||tmpcard[52].suit==Heart) random_shuffle(tmpcard, tmpcard+52);
             current_card[0].size = current_card[2].size = current_card[3].size = 0;
             for(int i=0;i<17;i++) current_card[0].ins(tmpcard[i]);
@@ -545,7 +545,7 @@ void deal_cards()
     {
         if(current_type == Winner)
         {
-            for(int i=0;i<rand()%50;i++)random_shuffle(tmpcard, tmpcard+54);
+            for(int i=0;i<rand()%50+5;i++)random_shuffle(tmpcard, tmpcard+54);
             current_card[0].size = current_card[1].size = current_card[2].size = current_card[3].size = 0;
             for(int i=0;i<13;i++) current_card[0].ins(tmpcard[i]);
             for(int i=13;i<26;i++) current_card[1].ins(tmpcard[i]);
@@ -554,7 +554,7 @@ void deal_cards()
         }
         else
         {
-            for(int i=0;i<rand()%50;i++)random_shuffle(tmpcard, tmpcard+52);
+            for(int i=0;i<rand()%50+5;i++)random_shuffle(tmpcard, tmpcard+52);
             current_card[0].size = current_card[1].size = current_card[2].size = current_card[3].size = 0;
             for(int i=0;i<13;i++) current_card[0].ins(tmpcard[i]);
             for(int i=13;i<26;i++) current_card[1].ins(tmpcard[i]);
