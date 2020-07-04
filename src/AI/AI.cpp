@@ -9,29 +9,6 @@
 #define ll long long
 using namespace std;
 
-
-/*enum GameType {
-  Winner,  // 争上游
-  Hearts   // 红心大战
-};
-enum Suit {
-  Club,     // 梅花
-  Diamond,  // 方块
-  Spade,     // 黑桃
-  Heart,    // 红桃
-};
-struct Card {
-  Suit suit;
-  // 1 for A, 11 for J, 12 for Q, 13 for K, 14 for small Joker, 15 for the big
-  // Joker, 16 for unknown
-  unsigned short rank;
-};
-class card_list
-{
-    public:
-        unsigned short size;
-        Card* cards;
-};//*/
 bool If_Card(const card_list yours,int x,int y)
 {
     for(int i=0;i<yours.size;i++)
@@ -640,17 +617,32 @@ void calc_round(int *b,int tot)
     }//cout<<"ok";
     if(tot<min_round||(tot==min_round&&bomb>max_bomb))
     {
-        if(min_round!=17)
-        for(int i=1;i<=min_round;i++)
-        {
-            min_result[i]=NULL;
-        }
         min_round=tot;
         max_bomb=bomb;
         for(int i=1;i<=tot;i++)
         {
+            if(min_result[i]!=NULL&&min_result[i]->type!=dragon)
+            {
+                delete min_result[i];
+                min_result[i]=NULL;
+            }
+
+        }
+        for(int i=1;i<=tot;i++)
+        {
             //delete min_result[i];
             min_result[i]=result[i];
+        }
+    }
+    else
+    {
+        for(int i=1;i<=tot;i++)
+        {
+            if(result[i]!=NULL&&result[i]->type!=dragon)
+            {
+                delete result[i];
+                result[i]=NULL;
+            }
         }
     }
 }
@@ -818,8 +810,8 @@ unsigned short &size
     }
     for(int i=0;i<16;i++)
     {
-        delete  result[i];
-        result[i]=NULL;
+        //delete  result[i];
+        //result[i]=NULL;
         delete  min_result[i];
         min_result[i]=NULL;
     }//*/
