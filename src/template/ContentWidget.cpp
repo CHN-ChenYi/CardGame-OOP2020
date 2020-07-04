@@ -756,6 +756,8 @@ void PlayWidget::SetInfo(const wstring &info) {
   QRect rect = QFontMetrics(font()).boundingRect(info_label_->text());
   info_label_->setMinimumWidth(rect.width());
   info_label_->setMinimumHeight(rect.height());
+  // process repaint event immediately
+  QApplication::processEvents();
 }
 
 bool PlayWidget::UpdatePlayer(const unsigned short id,
@@ -763,6 +765,8 @@ bool PlayWidget::UpdatePlayer(const unsigned short id,
                               const bool controlled_by_bot) {
   if (!deck[id]->Exist()) return false;
   return deck[id]->UpdatePlayer(network_status, controlled_by_bot);
+  // process repaint event immediately
+  QApplication::processEvents();
 }
 
 bool PlayWidget::UpdateCards(const unsigned short id, const short delta,
@@ -786,6 +790,8 @@ bool PlayWidget::ClearDesk(const unsigned short id) {
   if (!deck[id]->Exist()) return false;
   delete glayout_->itemAtPosition(pos_x[id], pos_y[id])->widget();
   glayout_->addWidget(new QWidget(this), pos_x[id], pos_y[id]);
+  // process repaint event immediately
+  QApplication::processEvents();
   return true;
 }
 
@@ -797,6 +803,8 @@ void PlayWidget::UpdateStatistics(const unsigned short points[4]) {
     new_text << points[i];
     score_label[i]->setText(QString::fromStdString(new_text.str()));
   }
+  // process repaint event immediately
+  QApplication::processEvents();
 }
 
 void PlayWidget::EndGame(const bool win_or_lose) {

@@ -672,7 +672,7 @@ void letplay(const unsigned short id)
 {
     now_player = id;
     if(final_winner != -1) return;
-    Sleep(1500);
+    if (id) Sleep(1500);
     //static int cnt = 0;
     qDebug()<<"letplay"<<id;
     if(id == 0)
@@ -1149,6 +1149,7 @@ void calc_statistics()
         }
         first_player = pos;
         qDebug()<<"lastwinner"<<" "<<pos;
+        Sleep(1500);
         for(int i=0;i<num_of_player;i++)window->ClearDesk(tr(i));
         for(int i=1;i<num_of_player;i++)if(route[i]!=-1){soc.getPeers().at(route[i])->getPeer()->sendLineW(L"-clear");}
         if(pt != 0)
