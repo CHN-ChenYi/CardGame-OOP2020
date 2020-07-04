@@ -75,6 +75,7 @@ static auto client = MeyaS::Client();
 
 void ServerEventProcess()
 {
+    qDebug()<<"num_of_player"<<num_of_player;
     static int cnt = 0;
     if(current_stage == 0) return;
     if(current_stage == 1)
@@ -110,13 +111,13 @@ void ServerEventProcess()
                      network_status[num_of_player - 1] = 1.0;
                      controlled_by_bot[num_of_player - 1] = false;
                      route[num_of_player - 1] = i;
-                     isreplied[i] = true;
+                     //isreplied[i] = true;
                      qDebug() << player_name << L" " << password << L" " << route[num_of_player - 1];
                  }
              }
              else if(player_name != L"")
              {
-                 isreplied[i] = true;
+                 //isreplied[i] = true;
                  qDebug()<<"wrong password or num_of_player exceeded";
                  if(password != current_room) peers.at(i)->getPeer()->sendLineW(L"-wrong_password");
                  else if(num_of_player >= 4) peers.at(i)->getPeer()->sendLineW(L"-player_exceeded");
