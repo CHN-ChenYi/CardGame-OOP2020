@@ -19,7 +19,6 @@ struct Card {
   // 1 for A, 11 for J, 12 for Q, 13 for K, 14 for small Joker, 15 for the big
   // Joker, 16 for unknown
   unsigned short rank;
-  bool operator==(Card &u) { return suit == u.suit && rank == u.rank; }
   bool operator==(const Card &u) { return suit == u.suit && rank == u.rank; }
   Card(Suit suit = Club, unsigned short rank = 16) {
     this->suit = suit;
@@ -93,6 +92,8 @@ extern bool (*CardLess[2])(const Card &, const Card &);
 void ServerEventProcess();
 void ClientEventProcess();
 void calc_statistics();
+void AIChange(unsigned short id);
+void AIPlay(unsigned short id);
 void letplay(const unsigned short id);
 bool CheckRules(const Card cards[], const unsigned short size,
                 const GameType type, card_list &cur);
