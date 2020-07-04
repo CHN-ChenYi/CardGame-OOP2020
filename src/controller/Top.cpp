@@ -75,6 +75,7 @@ static auto client = MeyaS::Client();
 
 void ServerEventProcess()
 {
+    qDebug()<<"num_of_player"<<num_of_player;
     static int cnt = 0;
     if(current_stage == 0) return;
     if(current_stage == 1)
@@ -110,13 +111,13 @@ void ServerEventProcess()
                      network_status[num_of_player - 1] = 1.0;
                      controlled_by_bot[num_of_player - 1] = false;
                      route[num_of_player - 1] = i;
-                     isreplied[i] = true;
+                     //isreplied[i] = true;
                      qDebug() << player_name << L" " << password << L" " << route[num_of_player - 1];
                  }
              }
              else if(player_name != L"")
              {
-                 isreplied[i] = true;
+                 //isreplied[i] = true;
                  qDebug()<<"wrong password or num_of_player exceeded";
                  if(password != current_room) peers.at(i)->getPeer()->sendLineW(L"-wrong_password");
                  else if(num_of_player >= 4) peers.at(i)->getPeer()->sendLineW(L"-player_exceeded");
@@ -507,14 +508,14 @@ void deal_cards()
     {
         if(current_type == Winner)
         {
-            for(int i=0;i<rand()%50;i++)random_shuffle(tmpcard, tmpcard+54);
+            for(int i=0;i<rand()%50+5;i++)random_shuffle(tmpcard, tmpcard+54);
             current_card[0].size = current_card[1].size = 0;
             for(int i=0;i<22;i++) current_card[0].ins(tmpcard[i]);
             for(int i=22;i<44;i++) current_card[1].ins(tmpcard[i]);
         }
         else
         {
-            for(int i=0;i<rand()%50;i++)random_shuffle(tmpcard, tmpcard+52);
+            for(int i=0;i<rand()%50+5;i++)random_shuffle(tmpcard, tmpcard+52);
             current_card[0].size = current_card[1].size = 0;
             for(int i=0;i<26;i++) current_card[0].ins(tmpcard[i]);
             for(int i=26;i<52;i++) current_card[1].ins(tmpcard[i]);
@@ -524,7 +525,7 @@ void deal_cards()
     {
         if(current_type == Winner)
         {
-            for(int i=0;i<rand()%50;i++)random_shuffle(tmpcard, tmpcard+54);
+            for(int i=0;i<rand()%50+5;i++)random_shuffle(tmpcard, tmpcard+54);
             current_card[0].size = current_card[2].size = current_card[3].size = 0;
             for(int i=0;i<18;i++) current_card[0].ins(tmpcard[i]);
             for(int i=18;i<36;i++) current_card[2].ins(tmpcard[i]);
@@ -532,7 +533,7 @@ void deal_cards()
         }
         else
         {
-            for(int i=0;i<rand()%50;i++)random_shuffle(tmpcard, tmpcard+52);
+            for(int i=0;i<rand()%50+5;i++)random_shuffle(tmpcard, tmpcard+52);
             while(tmpcard[52]==Card(Spade, 12)||tmpcard[52].suit==Heart) random_shuffle(tmpcard, tmpcard+52);
             current_card[0].size = current_card[2].size = current_card[3].size = 0;
             for(int i=0;i<17;i++) current_card[0].ins(tmpcard[i]);
@@ -544,7 +545,7 @@ void deal_cards()
     {
         if(current_type == Winner)
         {
-            for(int i=0;i<rand()%50;i++)random_shuffle(tmpcard, tmpcard+54);
+            for(int i=0;i<rand()%50+5;i++)random_shuffle(tmpcard, tmpcard+54);
             current_card[0].size = current_card[1].size = current_card[2].size = current_card[3].size = 0;
             for(int i=0;i<13;i++) current_card[0].ins(tmpcard[i]);
             for(int i=13;i<26;i++) current_card[1].ins(tmpcard[i]);
@@ -553,7 +554,7 @@ void deal_cards()
         }
         else
         {
-            for(int i=0;i<rand()%50;i++)random_shuffle(tmpcard, tmpcard+52);
+            for(int i=0;i<rand()%50+5;i++)random_shuffle(tmpcard, tmpcard+52);
             current_card[0].size = current_card[1].size = current_card[2].size = current_card[3].size = 0;
             for(int i=0;i<13;i++) current_card[0].ins(tmpcard[i]);
             for(int i=13;i<26;i++) current_card[1].ins(tmpcard[i]);
