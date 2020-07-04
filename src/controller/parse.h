@@ -3,6 +3,7 @@
 #include<vector>
 #include "src/template/MainWindow.h"
 using namespace std;
+void ssplit(wstring& s, vector<wstring>& sv);
 void connect_join_parse(wstring &raw, wstring &player_name, wstring &password);
 void player_rank_parse(wstring &raw, unsigned short& num_of_player, wstring* player_names,  double* network_status,
                  bool* controlled_by_bot, wstring current_name);

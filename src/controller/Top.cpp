@@ -11,33 +11,34 @@
 #define tr(j) trans[num_of_player][j]
 const int max_hist_size = 450;
 
-wstring current_room = L"123";
-GameType current_type = Winner;
-wstring current_name = L"";
-unsigned short num_of_player = 1;
-wstring player_names[4] = {L"", L"", L"", L""};
-unsigned short number_of_cards[4];
-short route[4] = {-1, -1, -1, -1};
-card_list current_card[4];
-bool controlled_by_bot[4] = {false, false, false, false};
-double network_status[4] = {0, 0, 0, 0};
-unsigned short points[4];
-bool isServer = false;
-int current_stage = 1; //1:等待玩家 2:等待开始游戏
-bool isreplied[10]={1,1,1,1,1,1,1,1,1,1};
-unsigned short trans[5][4]={{0,0,0,0},{0,0,0,0},{0,1,0,0},{0,2,3,0},{0,2,1,3}};
-card_list hist_card[max_hist_size];
-unsigned short hist_size = 0;
-unsigned short first_player = 0; // for Hearts
-bool canplay = 0;
-int final_winner = -1;
-unsigned short now_player = 0;
-bool ischanged = 0;
-short round = 0;
-bool istypeknown = 0;
-card_list tochange[4];
-bool first_time_connect = 1;
-extern MainWindow *window;
+wstring current_room = L"123";  //当前房间密码
+GameType current_type = Winner; //当前游戏类型
+wstring current_name = L"";     //当前玩家名称
+unsigned short num_of_player = 1;                //当前玩家个数
+wstring player_names[4] = {L"", L"", L"", L""};  //玩家游戏名
+unsigned short number_of_cards[4];    //玩家手牌数
+short route[4] = {-1, -1, -1, -1};    //玩家对应的网络模块的连接编号，-1表示AI
+card_list current_card[4];   //玩家当前手牌
+bool controlled_by_bot[4] = {false, false, false, false};     //玩家是否被托管
+double network_status[4] = {0, 0, 0, 0};   //玩家网络状态
+unsigned short points[4];    //玩家积分
+bool isServer = false;       //当前端的类型（服务端/客户端）
+int current_stage = 1;       //1:等待玩家 2:等待开始游戏
+bool isreplied[10]={1,1,1,1,1,1,1,1,1,1};    //用于消息处理
+unsigned short trans[5][4]={{0,0,0,0},{0,0,0,0},{0,1,0,0},{0,2,3,0},{0,2,1,3}};   //将玩家的id映射到游戏界面的id
+card_list hist_card[max_hist_size];       //出牌记录
+unsigned short hist_size = 0;             //出牌记录大小
+unsigned short first_player = 0;          //红心大战时上轮赢家
+bool canplay = 0;                         //当前玩家是否具有出牌权
+int final_winner = -1;                    //最终赢家
+unsigned short now_player = 0;            //当前出牌的玩家
+bool ischanged = 0;                       //红心大战中换牌是否结束
+short round = 0;                          //当前游戏局数
+bool istypeknown = 0;                     //用于客户端加入游戏
+card_list tochange[4];                    //红心大战中玩家所换的牌
+bool first_time_connect = 1;              //记录是否是第一次建立连接
+extern MainWindow *window;                //主界面
+
 
 unsigned short card_value(Card u)
 {
@@ -562,14 +563,52 @@ void deal_cards()
     }
 }
 
-void AIChange(unsigned short i)
+void AIChange(unsigned short id)
 {
-    unsigned short *tmp = Exchange_Hearts(current_card[tr(i)]);
+    unsigned short *tmp = Exchange_Hearts(current_card[tr(id)]);
     sort(tmp,tmp+3);
     for(int j=2;j>=0;j--)
     {
-        tochange[(1+i+round)%num_of_player].ins(current_card[tr(i)].cards[tmp[j]]);
-        current_card[tr(i)].DeleteCard(tmp[j]);
+        tochange[(1+id+round)%num_of_player].ins(current_card[tr(id)].cards[tmp[j]]);
+        current_card[tr(id)].DeleteCard(tmp[j]);
+    }
+}
+
+void AIPlay(unsigned short id)
+{
+    card_list cur;
+    unsigned short* tmp;
+    if(current_type == Winner) tmp = Play_Winners(current_card[tr(id)], hist_card, hist_size, cur.size);
+    else tmp = Play_Hearts(current_card[tr(id)], hist_card, hist_size), cur.size = 1;
+    for(int i=0;i<cur.size;i++) cur.cards[i] = current_card[tr(id)].cards[tmp[i]];
+    sort(tmp,tmp+cur.size);
+    for(int i=cur.size-1;i>=0;i--) current_card[tr(id)].DeleteCard(tmp[i]);
+    hist_card[hist_size++]=cur;
+    window->UpdateCards(tr(id), cur.size, cur.cards, true);
+    for(int i=1;i<num_of_player;i++)
+    {
+        if(i!=id && route[i]!=-1)
+        {
+            wstring s=L"-info "+player_names[tr(id)]+L" "+cur.towstring();
+            qDebug()<<s;
+            auto peers = soc.getPeers();
+            auto stream = peers.at(route[i])->getPeer();
+            stream->sendLineW(s);
+        }
+    }
+    calc_statistics();
+    if(final_winner == -1)
+    {
+        if(current_type == Hearts && hist_size % num_of_player == 0)
+        {
+            window->ClearDesk(tr(first_player));
+            letplay(first_player);
+        }
+        else
+        {
+            window->ClearDesk(tr((id+1)%num_of_player));
+            letplay((id+1)%num_of_player);
+        }
     }
 }
 void StartGame() {
@@ -683,42 +722,7 @@ void letplay(const unsigned short id)
     }
     if(controlled_by_bot[tr(id)] || route[id] == -1)
     {
-        //window->EndNetworkEventLoop();
-        //get ai play
-        card_list cur;
-        unsigned short* tmp;
-        if(current_type == Winner) tmp = Play_Winners(current_card[tr(id)], hist_card, hist_size, cur.size);
-        else tmp = Play_Hearts(current_card[tr(id)], hist_card, hist_size), cur.size = 1;
-        for(int i=0;i<cur.size;i++) cur.cards[i] = current_card[tr(id)].cards[tmp[i]];
-        sort(tmp,tmp+cur.size);
-        for(int i=cur.size-1;i>=0;i--) current_card[tr(id)].DeleteCard(tmp[i]);
-        hist_card[hist_size++]=cur;
-        window->UpdateCards(tr(id), cur.size, cur.cards, true);
-        for(int i=1;i<num_of_player;i++)
-        {
-            if(i!=id && route[i]!=-1)
-            {
-                wstring s=L"-info "+player_names[tr(id)]+L" "+cur.towstring();
-                qDebug()<<s;
-                auto peers = soc.getPeers();
-                auto stream = peers.at(route[i])->getPeer();
-                stream->sendLineW(s);
-            }
-        }
-        calc_statistics();
-        if(final_winner == -1)
-        {
-            if(current_type == Hearts && hist_size % num_of_player == 0)
-            {
-                window->ClearDesk(tr(first_player));
-                letplay(first_player);
-            }
-            else
-            {
-                window->ClearDesk(tr((id+1)%num_of_player));
-                letplay((id+1)%num_of_player);
-            }
-        }
+        AIPlay(id);
     }
     else
     {
@@ -939,7 +943,7 @@ void Exit()
 {
     if(isServer)
     {
-        return; //不知道干啥
+        return; //此处可以扩展
     }
     else
     {
