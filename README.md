@@ -1,4 +1,4 @@
-# oop2020
+# CardGame
 
 See [report.md](./report/report.md)
 
